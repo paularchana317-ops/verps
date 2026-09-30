@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Requests - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="user-dashboard.html" class="brand-logo">
+        <div class="logo-badge">V</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Requester Portal</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="user-dashboard.html" class="btn btn-secondary">Dashboard</a>
+        <a href="request-product.html" class="btn btn-primary">➕ New Request</a>
+        <div class="nav-user">
+          <div class="user-info">
+            <span id="navUserName" class="user-name">Requester</span>
+            <span id="navUserRole" class="user-role-badge user">User / Requester</span>
+          </div>
+          <button onclick="logout()" class="btn btn-outline-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Header Summary -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 style="font-size: 1.85rem; margin-bottom: 0.25rem;">My Purchase Requests</h1>
+        <p>View, track, and monitor all product requests you have submitted to the procurement system.</p>
+      </div>
+      <div>
+        <span id="totalRequestsCount" class="badge" style="background: var(--primary-light); color: var(--primary); font-size: 0.9rem; padding: 0.4rem 0.85rem;">
+          0 Requests
+        </span>
+      </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-container">
+      <div class="table-header-bar">
+        <div style="font-weight: 700; font-size: 1.05rem; color: var(--text-main);">
+          Requisition History
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <input 
+            type="text" 
+            id="tableSearchInput" 
+            class="form-control" 
+            placeholder="Search by ID or Product..." 
+            style="width: 250px; padding: 0.45rem 0.75rem; font-size: 0.875rem;"
+            onkeyup="filterRequests()"
+          >
+          <button onclick="loadMyRequests()" class="btn btn-secondary" title="Refresh List" style="padding: 0.45rem 0.85rem;">
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="tableLoading" style="text-align: center; padding: 3rem 1rem; color: var(--text-muted); display: none;">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">⏳</div>
+        <div>Loading your purchase requests from database...</div>
+      </div>
+
+      <!-- Table -->
+      <div style="overflow-x: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Request ID</th>
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Request Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="myRequestsTableBody">
+            <!-- Dynamic rows injected by requests.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div id="tableEmpty" style="text-align: center; padding: 4rem 1.5rem; display: none;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">No purchase requests found</h3>
+        <p style="max-width: 420px; margin: 0 auto 1.5rem;">
+          You haven't submitted any product requisitions yet. Click the button below to submit your first purchase request.
+        </p>
+        <a href="request-product.html" class="btn btn-primary btn-lg">
+          ➕ Request Product Now
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/requests.js"></script>
+  <script>
+    // Enforce Role Guard: Only 'User/Requester' allowed
+    checkAuth(['User/Requester']);
+  </script>
+</body>
+</html>

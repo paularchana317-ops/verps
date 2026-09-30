@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VEPRS - Vendor Evaluation & Purchase Recommendation System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand-logo">
+        <div class="logo-badge">V</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Procurement & Evaluation</span>
+        </div>
+      </a>
+      <div class="nav-links" id="navActions">
+        <a href="login.html" class="btn btn-secondary">Sign In</a>
+        <a href="register.html" class="btn btn-primary">Create Account</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Public Content -->
+  <main class="main-container">
+    <!-- Hero Banner -->
+    <div class="dashboard-welcome" style="margin-top: 1.5rem; padding: 3rem 2.5rem;">
+      <div>
+        <span class="placeholder-tag" style="background: rgba(255,255,255,0.15); color: #FFFFFF; border: none; margin-bottom: 0.85rem;">
+          Enterprise Procurement Portal
+        </span>
+        <h1 style="font-size: 2.35rem; margin-bottom: 0.75rem; letter-spacing: -0.5px;">
+          Vendor Evaluation & Purchase Recommendation System
+        </h1>
+        <p style="font-size: 1.05rem; max-width: 680px; color: #D8D4CC; margin-bottom: 1.75rem;">
+          Standardize supplier assessments, streamline computer accessory requisitions, and accelerate quotation tender workflows with data-driven precision.
+        </p>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <a href="login.html" class="btn btn-secondary btn-lg" style="background: #FFFFFF; color: #1F1F1F !important; font-weight: 700;">
+            Sign In to Portal →
+          </a>
+          <a href="register.html" class="btn btn-primary btn-lg" style="background: transparent; border: 1px solid #D8D4CC; color: #FFFFFF !important;">
+            Register as Vendor / Requester
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 1: Evaluated & Recommended Vendors (Public Showcase) -->
+    <div style="margin: 3.5rem 0 2rem 0;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+        <div>
+          <span class="placeholder-tag" style="background: var(--warning-light); color: var(--warning-text); border-color: var(--warning-subtle);">
+            Verified Supplier Directory
+          </span>
+          <h2 style="font-size: 1.75rem; margin-top: 0.35rem;">Evaluated & Recommended Vendors</h2>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">
+            Certified enterprise vendors specializing in Computer Accessories.
+          </p>
+        </div>
+        <a href="login.html" class="btn btn-secondary" style="font-size: 0.85rem;">
+          Sign In to Tender Quotations →
+        </a>
+      </div>
+
+      <!-- Dynamic Vendors Grid -->
+      <div id="vendorShowcaseContainer" class="vendor-showcase-grid">
+        <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted);">
+          Loading recommended vendors...
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Core System Capabilities -->
+    <div style="margin: 3.5rem 0;">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <span class="placeholder-tag">System Modules</span>
+        <h2 style="font-size: 1.75rem; margin-top: 0.35rem;">End-to-End Procurement Flow</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 600px; margin: 0 auto;">
+          From user purchase requests and admin RFQ tenders to vendor quotations and automated price calculations.
+        </p>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="dashboard-card">
+          <div class="card-icon">🏢</div>
+          <h3>Vendor Directory</h3>
+          <p>Automatic onboarding for newly registered vendors with instant Admin directory indexing and profile validation.</p>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="card-icon">📋</div>
+          <h3>Purchase Requisitions</h3>
+          <p>Standardized requisition forms dedicated to Computer Accessories with instant Request ID (REQ-1001) tracking.</p>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="card-icon">📨</div>
+          <h3>Quotation Tenders</h3>
+          <p>Admin dispatches multi-vendor quotation requests (QR-1001) with strict cross-tenant vendor inbox isolation.</p>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="card-icon">💰</div>
+          <h3>Instant Quote Submissions</h3>
+          <p>Vendors submit unit pricing with live total price computation (QUO-1001) and duplicate tender guards.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. If user is logged in, show personalized navbar link
+      const user = typeof getUser === 'function' ? getUser() : null;
+      const navActions = document.getElementById('navActions');
+      if (user && navActions) {
+        navActions.innerHTML = `
+          <span style="font-size: 0.9rem; color: var(--text-muted);">Signed in as <strong>${user.name}</strong></span>
+          <button onclick="goToMyDashboard()" class="btn btn-primary">Go to Dashboard →</button>
+        `;
+      }
+
+      // 2. Fetch and render Recommended Vendors
+      const container = document.getElementById('vendorShowcaseContainer');
+      try {
+        const res = await fetch('/api/vendors/public');
+        const data = await res.json();
+
+        if (res.ok && data.success && data.vendors && data.vendors.length > 0) {
+          container.innerHTML = data.vendors.map(v => `
+            <div class="vendor-showcase-card">
+              <div class="vendor-card-header">
+                <div>
+                  <span class="request-id-tag">${v.vendor_id || 'VEN'}</span>
+                  <span class="badge badge-approved" style="margin-left: 0.35rem; font-size: 0.7rem;">Verified</span>
+                </div>
+                <div class="rating-pill">
+                  ⭐ <span>${v.rating || '4.9'}</span>
+                </div>
+              </div>
+
+              <h3 style="font-size: 1.15rem; margin: 0.4rem 0 0.25rem 0; color: var(--text-main); font-weight: 700;">
+                ${escapeHtml(v.vendor_name)}
+              </h3>
+
+              <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                📍 ${escapeHtml(v.city || 'Tamil Nadu')}${v.state ? ', ' + escapeHtml(v.state) : ''}
+              </div>
+
+              <div style="margin-bottom: 0.85rem;">
+                <span style="display: inline-block; font-size: 0.75rem; background: var(--primary-light); color: var(--primary); padding: 0.2rem 0.55rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-weight: 600;">
+                  📦 ${escapeHtml(v.category || 'Computer Accessories')}
+                </span>
+              </div>
+
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; flex: 1;">
+                ${escapeHtml(v.description || 'Certified supplier of enterprise computer hardware and accessories.')}
+              </p>
+
+              <div style="border-top: 1px solid var(--border-color); padding-top: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.775rem; color: var(--text-muted); font-weight: 500;">
+                  🏆 ${escapeHtml(v.badge || 'Top Rated Supplier')}
+                </span>
+                <a href="login.html" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">
+                  Request Quote →
+                </a>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted);">
+              No recommended vendors currently active.
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error('Error fetching public vendors:', err);
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted);">
+            Unable to load vendor directory at this time.
+          </div>
+        `;
+      }
+    });
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.toString()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="admin-dashboard.html" class="brand-logo">
+        <div class="logo-badge">A</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Administrator Portal</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <div class="nav-user">
+          <div class="user-info">
+            <span id="navUserName" class="user-name">Admin</span>
+            <span id="navUserRole" class="user-role-badge admin">Admin</span>
+          </div>
+          <button onclick="logout()" class="btn btn-outline-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Welcome Banner (Ink & Paper) -->
+    <div class="dashboard-welcome">
+      <div>
+        <h1>Welcome, <span id="dashboardUserName">Administrator</span></h1>
+        <p>Enterprise administration, vendor directory governance, and quotation request tenders.</p>
+        <span id="dashboardUserRole" class="dashboard-role-badge">Role: Admin</span>
+      </div>
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <a href="add-vendor.html" class="btn btn-secondary btn-lg" style="background: #FFFFFF; color: #1F1F1F !important; font-weight: 700;">
+          ➕ Add Vendor
+        </a>
+        <a href="purchase-requests.html" class="btn btn-primary btn-lg" style="background: transparent; border: 1px solid #D8D4CC; color: #FFFFFF !important;">
+          📑 View Requests
+        </a>
+      </div>
+    </div>
+
+    <!-- Admin Modules -->
+    <h2 style="font-size: 1.35rem; margin-bottom: 1.25rem;">Administrative Governance Modules</h2>
+
+    <div class="dashboard-grid">
+      <!-- 1. Vendor Management -->
+      <div class="dashboard-card highlight">
+        <div class="card-icon">🏢</div>
+        <h3>Vendor Management</h3>
+        <p>Onboard qualified vendors, maintain company compliance records, and manage active supplier statuses.</p>
+        <a href="vendor-management.html" class="btn btn-primary btn-block">
+          Manage Vendors →
+        </a>
+      </div>
+
+      <!-- 2. Purchase Requests -->
+      <div class="dashboard-card highlight">
+        <div class="card-icon">📑</div>
+        <h3>Purchase Requests</h3>
+        <p>Review organizational purchase requisitions submitted across departments and initiate quotation requests.</p>
+        <a href="purchase-requests.html" class="btn btn-primary btn-block">
+          View Requests & Dispatch →
+        </a>
+      </div>
+
+      <!-- 3. User Management (Placeholder) -->
+      <div class="dashboard-card">
+        <span class="placeholder-tag">Upcoming</span>
+        <div class="card-icon placeholder-icon">👥</div>
+        <h3>User Management</h3>
+        <p>Manage system users, approve account roles, configure access privileges, and monitor login activity.</p>
+        <button onclick="showPlaceholderNotice('User Management')" class="btn btn-secondary btn-block">
+          Open Management
+        </button>
+      </div>
+
+      <!-- 4. Vendor Evaluation (Placeholder) -->
+      <div class="dashboard-card">
+        <span class="placeholder-tag">Upcoming</span>
+        <div class="card-icon placeholder-icon">⚖️</div>
+        <h3>Vendor Evaluation</h3>
+        <p>Run multi-criteria decision models (AHP/TOPSIS) to rank vendor quotation submissions and evaluate reliability.</p>
+        <button onclick="showPlaceholderNotice('Vendor Evaluation & Recommendation Engine')" class="btn btn-secondary btn-block">
+          Run Evaluation
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Module Notice Modal -->
+  <div id="placeholderModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-icon" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--border-color);">⚙️</div>
+      <h2 id="placeholderModalTitle" class="modal-title">Module Notice</h2>
+      <div id="placeholderModalBody" class="modal-body"></div>
+      <div class="modal-actions">
+        <button onclick="closeModal('placeholderModal')" class="btn btn-primary">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script>
+    // Enforce Role Guard: Only 'Admin' allowed
+    checkAuth(['Admin']);
+  </script>
+</body>
+</html>

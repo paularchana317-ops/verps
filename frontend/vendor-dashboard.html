@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Dashboard - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="vendor-dashboard.html" class="brand-logo">
+        <div class="logo-badge">V</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Supplier & Vendor Portal</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <div class="nav-user">
+          <div class="user-info">
+            <span id="navUserName" class="user-name">Vendor</span>
+            <span id="navUserRole" class="user-role-badge vendor">Vendor</span>
+          </div>
+          <button onclick="logout()" class="btn btn-outline-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Welcome Banner (Ink & Paper) -->
+    <div class="dashboard-welcome">
+      <div>
+        <h1>Welcome, <span id="dashboardUserName">Supplier Partner</span></h1>
+        <p>Review open quotation tenders, submit competitive bids, and track purchase fulfillment.</p>
+        <span id="dashboardUserRole" class="dashboard-role-badge">Role: Vendor</span>
+      </div>
+      <div>
+        <a href="vendor-quotation-requests.html" class="btn btn-secondary btn-lg" style="background: #FFFFFF; color: #1F1F1F !important; font-weight: 700;">
+          📬 View Quotation Requests
+        </a>
+      </div>
+    </div>
+
+    <!-- Vendor Modules -->
+    <h2 style="font-size: 1.35rem; margin-bottom: 1.25rem;">Vendor Bidding & Order Modules</h2>
+
+    <div class="dashboard-grid">
+      <!-- 1. Quotation Requests -->
+      <div class="dashboard-card highlight">
+        <div class="card-icon">📬</div>
+        <h3>Quotation Requests</h3>
+        <p>Browse open invitations for bids from purchasing departments matched with your catalog and submit price quotes.</p>
+        <a href="vendor-quotation-requests.html" class="btn btn-primary btn-block">
+          Open Quotation Requests →
+        </a>
+      </div>
+
+      <!-- 2. Submit Quotation -->
+      <div class="dashboard-card">
+        <div class="card-icon">📤</div>
+        <h3>Submit Quotation</h3>
+        <p>Submit itemized pricing quotes, delivery lead times, warranty terms, and discounts for open invitations.</p>
+        <a href="vendor-quotation-requests.html" class="btn btn-secondary btn-block">
+          Select Invitation →
+        </a>
+      </div>
+
+      <!-- 3. My Quotations (Placeholder) -->
+      <div class="dashboard-card">
+        <span class="placeholder-tag">Upcoming</span>
+        <div class="card-icon placeholder-icon">📜</div>
+        <h3>My Quotations</h3>
+        <p>Track statuses of your active and past quotation proposals, awards, and feedback scores.</p>
+        <button onclick="showPlaceholderNotice('My Quotations History')" class="btn btn-secondary btn-block">
+          View History
+        </button>
+      </div>
+
+      <!-- 4. Orders (Placeholder) -->
+      <div class="dashboard-card">
+        <span class="placeholder-tag">Upcoming</span>
+        <div class="card-icon placeholder-icon">📦</div>
+        <h3>Orders</h3>
+        <p>Manage awarded Purchase Orders (PO), confirm dispatch dates, and upload delivery invoices.</p>
+        <button onclick="showPlaceholderNotice('Vendor Orders')" class="btn btn-secondary btn-block">
+          Manage Orders
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Module Notice Modal -->
+  <div id="placeholderModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-icon" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--border-color);">📦</div>
+      <h2 id="placeholderModalTitle" class="modal-title">Module Notice</h2>
+      <div id="placeholderModalBody" class="modal-body"></div>
+      <div class="modal-actions">
+        <button onclick="closeModal('placeholderModal')" class="btn btn-primary">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script>
+    // Enforce Role Guard: Only 'Vendor' allowed
+    checkAuth(['Vendor']);
+  </script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User & Vendor Registration - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand-logo">
+        <div class="logo-badge">V</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Procurement & Evaluation</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="login.html" class="btn btn-secondary">Sign In</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Registration Card -->
+  <main class="auth-wrapper">
+    <div class="auth-card" style="max-width: 580px;">
+      <div class="auth-header">
+        <h1>Create Account</h1>
+        <p>Register as a Requester, Admin, or Certified Vendor Partner</p>
+      </div>
+
+      <!-- Alert Notification Banner -->
+      <div id="registerAlert" class="alert" style="display: none;"></div>
+
+      <form id="registerForm" novalidate>
+        <!-- Role Selection -->
+        <div class="form-group">
+          <label for="role">Select System Role <span class="required-star">*</span></label>
+          <select id="role" class="form-control" required style="font-weight: 600;">
+            <option value="">-- Choose your role --</option>
+            <option value="User/Requester">User / Requester</option>
+            <option value="Vendor">Vendor / Supplier Partner</option>
+            <option value="Admin">Administrator</option>
+          </select>
+          <span class="form-hint">Selecting 'Vendor' enables automatic onboarding into the Vendor Directory.</span>
+        </div>
+
+        <!-- Full Name / Contact Person -->
+        <div class="form-group">
+          <label for="fullName"><span id="nameLabel">Full Name / Contact Person</span> <span class="required-star">*</span></label>
+          <input 
+            type="text" 
+            id="fullName" 
+            class="form-control" 
+            placeholder="e.g. John Doe / Raj Kumar" 
+            required
+            autocomplete="name"
+          >
+        </div>
+
+        <!-- Vendor Specific Fields (Shown when Role === 'Vendor') -->
+        <div id="vendorFieldsSection" style="display: none; background: #fffdf5; border: 1px solid #fde68a; border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.35rem;">
+          <h3 style="font-size: 0.95rem; color: #b45309; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+            🏢 Vendor Organization Details
+          </h3>
+
+          <div class="form-group">
+            <label for="vendorName">Company / Vendor Name <span class="required-star">*</span></label>
+            <input 
+              type="text" 
+              id="vendorName" 
+              class="form-control" 
+              placeholder="e.g. ABC Computers"
+            >
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="vendorPhone">Phone Number <span class="required-star">*</span></label>
+              <input 
+                type="tel" 
+                id="vendorPhone" 
+                class="form-control" 
+                placeholder="e.g. 9876543210"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="productCategories">Product Category</label>
+              <select id="productCategories" class="form-control">
+                <option value="Computer Accessories" selected>Computer Accessories</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="vendorAddress">Business Address / City</label>
+            <input 
+              type="text" 
+              id="vendorAddress" 
+              class="form-control" 
+              placeholder="e.g. 12 Main Road, Coimbatore"
+            >
+          </div>
+        </div>
+
+        <!-- Email Address -->
+        <div class="form-group">
+          <label for="email">Official Email Address <span class="required-star">*</span></label>
+          <input 
+            type="email" 
+            id="email" 
+            class="form-control" 
+            placeholder="e.g. abc@gmail.com" 
+            required
+            autocomplete="email"
+          >
+          <span class="form-hint">Used for authentication and quotation tender notifications.</span>
+        </div>
+
+        <!-- Password & Confirm Password -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="password">Password <span class="required-star">*</span></label>
+            <input 
+              type="password" 
+              id="password" 
+              class="form-control" 
+              placeholder="••••••••" 
+              required
+              autocomplete="new-password"
+            >
+            <span class="form-hint">Min. 6 chars with letters & numbers.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password <span class="required-star">*</span></label>
+            <input 
+              type="password" 
+              id="confirmPassword" 
+              class="form-control" 
+              placeholder="••••••••" 
+              required
+              autocomplete="new-password"
+            >
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="registerBtn" class="btn btn-primary btn-block btn-lg" style="margin-top: 1rem;">
+          Complete Registration
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.75rem; font-size: 0.9rem; color: var(--text-muted);">
+        Already have an account? <a href="login.html" style="font-weight: 600;">Sign in here</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('registerForm');
+      const alertBox = document.getElementById('registerAlert');
+      const registerBtn = document.getElementById('registerBtn');
+      const roleSelect = document.getElementById('role');
+      const vendorSection = document.getElementById('vendorFieldsSection');
+      const nameLabel = document.getElementById('nameLabel');
+
+      // Toggle Vendor fields when Role changes
+      if (roleSelect && vendorSection) {
+        roleSelect.addEventListener('change', () => {
+          if (roleSelect.value === 'Vendor') {
+            vendorSection.style.display = 'block';
+            nameLabel.textContent = 'Contact Person Name';
+          } else {
+            vendorSection.style.display = 'none';
+            nameLabel.textContent = 'Full Name';
+          }
+        });
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        alertBox.style.display = 'none';
+
+        const name = document.getElementById('fullName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const role = document.getElementById('role').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        // Vendor specific values
+        const vendorName = document.getElementById('vendorName') ? document.getElementById('vendorName').value.trim() : '';
+        const phone = document.getElementById('vendorPhone') ? document.getElementById('vendorPhone').value.trim() : '';
+        const productCategories = document.getElementById('productCategories') ? document.getElementById('productCategories').value.trim() : 'Computer Accessories';
+        const address = document.getElementById('vendorAddress') ? document.getElementById('vendorAddress').value.trim() : '';
+
+        // 1. Client validations
+        if (!name || !email || !role || !password || !confirmPassword) {
+          showAlert('Please fill in all required fields.', 'danger');
+          return;
+        }
+
+        if (role === 'Vendor' && !vendorName) {
+          showAlert('Company / Vendor Name is required for Vendor registration.', 'danger');
+          document.getElementById('vendorName').focus();
+          return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          showAlert('Please enter a valid email address.', 'danger');
+          return;
+        }
+
+        if (password.length < 6) {
+          showAlert('Password must be at least 6 characters long.', 'danger');
+          return;
+        }
+
+        const hasLetter = /[a-zA-Z]/.test(password);
+        const hasNumber = /[0-9]/.test(password);
+        if (!hasLetter || !hasNumber) {
+          showAlert('Password must contain at least one letter and one number.', 'danger');
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          showAlert('Password and Confirm Password do not match.', 'danger');
+          return;
+        }
+
+        // 2. Submit to backend
+        registerBtn.disabled = true;
+        registerBtn.textContent = 'Registering Account...';
+
+        const payload = {
+          name,
+          email,
+          role,
+          password,
+          confirmPassword,
+          vendorName: vendorName || name,
+          companyName: vendorName || name,
+          phone: phone || 'N/A',
+          address: address || 'N/A',
+          productCategories: productCategories || 'Computer Accessories'
+        };
+
+        try {
+          const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.success) {
+            const successMsg = data.vendorId 
+              ? `Vendor registration successful! Assigned ID: <strong>${data.vendorId}</strong>. Redirecting to login...`
+              : 'Registration successful! Redirecting to login page...';
+            
+            showAlert(successMsg, 'success');
+            form.reset();
+            setTimeout(() => {
+              window.location.href = '/login.html?registered=true';
+            }, 1800);
+          } else {
+            showAlert(data.message || 'Registration failed.', 'danger');
+            registerBtn.disabled = false;
+            registerBtn.textContent = 'Complete Registration';
+          }
+        } catch (err) {
+          showAlert('Unable to connect to the server. Please try again.', 'danger');
+          registerBtn.disabled = false;
+          registerBtn.textContent = 'Complete Registration';
+        }
+      });
+
+      function showAlert(msg, type) {
+        alertBox.className = `alert alert-${type}`;
+        alertBox.innerHTML = `<span>${type === 'success' ? '✅' : '⚠️'} ${msg}</span>`;
+        alertBox.style.display = 'flex';
+        alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  </script>
+</body>
+</html>

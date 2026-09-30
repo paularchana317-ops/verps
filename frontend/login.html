@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Login - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand-logo">
+        <div class="logo-badge">V</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Procurement & Evaluation</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="register.html" class="btn btn-secondary">Create Account</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Login Card -->
+  <main class="auth-wrapper">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h1>Welcome Back</h1>
+        <p>Sign in to your VEPRS role dashboard</p>
+      </div>
+
+      <!-- Alert Notification Banner -->
+      <div id="loginAlert" class="alert" style="display: none;"></div>
+
+      <form id="loginForm" novalidate>
+        <!-- Email Address -->
+        <div class="form-group">
+          <label for="email">Email Address <span class="required-star">*</span></label>
+          <input 
+            type="email" 
+            id="email" 
+            class="form-control" 
+            placeholder="e.g. requester@veprs.com" 
+            required
+            autocomplete="email"
+          >
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label for="password">Password <span class="required-star">*</span></label>
+          <input 
+            type="password" 
+            id="password" 
+            class="form-control" 
+            placeholder="••••••••" 
+            required
+            autocomplete="current-password"
+          >
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="loginBtn" class="btn btn-primary btn-block btn-lg" style="margin-top: 1.25rem;">
+          Sign In
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.75rem; font-size: 0.9rem; color: var(--text-muted);">
+        Don't have an account? <a href="register.html" style="font-weight: 600;">Register now</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('loginForm');
+      const alertBox = document.getElementById('loginAlert');
+      const loginBtn = document.getElementById('loginBtn');
+
+      // Check if redirected after registration
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('registered') === 'true') {
+        showAlert('Registration successful! Please log in with your credentials.', 'success');
+      } else if (urlParams.get('session_expired') === '1') {
+        showAlert('Your session has expired. Please sign in again.', 'warning');
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        alertBox.style.display = 'none';
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        if (!email || !password) {
+          showAlert('Please enter both email and password.', 'danger');
+          return;
+        }
+
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Authenticating...';
+
+        try {
+          const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.success) {
+            // Save token and user details to localStorage
+            setAuth(data.token, data.user);
+            showAlert('Login successful! Redirecting to your dashboard...', 'success');
+
+            // Redirect based on identified role
+            setTimeout(() => {
+              const redirectParam = urlParams.get('redirect');
+              if (redirectParam && !redirectParam.includes('login') && !redirectParam.includes('register')) {
+                window.location.href = decodeURIComponent(redirectParam);
+              } else {
+                window.location.href = data.redirectUrl || '/user-dashboard.html';
+              }
+            }, 800);
+          } else {
+            showAlert(data.message || 'Invalid email or password.', 'danger');
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Sign In';
+          }
+        } catch (err) {
+          showAlert('Failed to connect to authentication server.', 'danger');
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Sign In';
+        }
+      });
+
+      function showAlert(msg, type) {
+        alertBox.className = `alert alert-${type}`;
+        alertBox.innerHTML = `<span>${type === 'success' ? '✅' : '⚠️'} ${msg}</span>`;
+        alertBox.style.display = 'flex';
+      }
+    });
+  </script>
+</body>
+</html>

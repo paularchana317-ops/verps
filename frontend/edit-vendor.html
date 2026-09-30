@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Update Vendor - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="admin-dashboard.html" class="brand-logo">
+        <div class="logo-badge">A</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Administrator Portal</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="admin-dashboard.html" class="btn btn-secondary">Dashboard</a>
+        <a href="vendor-management.html" class="btn btn-secondary">Vendor Directory</a>
+        <div class="nav-user">
+          <div class="user-info">
+            <span id="navUserName" class="user-name">Admin</span>
+            <span id="navUserRole" class="user-role-badge admin">Admin</span>
+          </div>
+          <button onclick="logout()" class="btn btn-outline-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <div class="content-card">
+      <div class="content-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h1>Update Vendor Details</h1>
+          <p>Modify supplier parameters, category tags, or active status.</p>
+        </div>
+        <div>
+          <span id="vendorIdDisplay" class="request-id-tag" style="font-size: 1rem; padding: 0.35rem 0.85rem;">VEN-XXXX</span>
+        </div>
+      </div>
+
+      <!-- Live Error / Validation Alert -->
+      <div id="formAlert" class="alert" style="display: none;"></div>
+
+      <form id="editVendorForm" novalidate>
+        <!-- Vendor Name & Contact Person -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="vendorName">Vendor / Company Name <span class="required-star">*</span></label>
+            <input 
+              type="text" 
+              id="vendorName" 
+              class="form-control" 
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="contactPerson">Contact Person <span class="required-star">*</span></label>
+            <input 
+              type="text" 
+              id="contactPerson" 
+              class="form-control" 
+              required
+            >
+          </div>
+        </div>
+
+        <!-- Email & Phone -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Official Email Address <span class="required-star">*</span></label>
+            <input 
+              type="email" 
+              id="email" 
+              class="form-control" 
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number <span class="required-star">*</span></label>
+            <input 
+              type="tel" 
+              id="phone" 
+              class="form-control" 
+              required
+            >
+          </div>
+        </div>
+
+        <!-- Address -->
+        <div class="form-group">
+          <label for="address">Street Address <span class="required-star">*</span></label>
+          <input 
+            type="text" 
+            id="address" 
+            class="form-control" 
+            required
+          >
+        </div>
+
+        <!-- City & State -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="city">City</label>
+            <input 
+              type="text" 
+              id="city" 
+              class="form-control"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="state">State</label>
+            <input 
+              type="text" 
+              id="state" 
+              class="form-control"
+            >
+          </div>
+        </div>
+
+        <!-- Product Categories -->
+        <div class="form-group">
+          <label for="productCategories">Product Categories Supplied <span class="required-star">*</span></label>
+          <input 
+            type="text" 
+            id="productCategories" 
+            class="form-control" 
+            required
+          >
+          <span class="form-hint">Categories supplied (e.g. Computer Accessories).</span>
+        </div>
+
+        <!-- Business Registration & Status -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="businessRegistrationNumber">Business Registration Number (BRN)</label>
+            <input 
+              type="text" 
+              id="businessRegistrationNumber" 
+              class="form-control"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="status">Vendor Status <span class="required-star">*</span></label>
+            <select id="status" class="form-control" required>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label for="description">Vendor Description</label>
+          <textarea 
+            id="description" 
+            class="form-control" 
+            rows="3"
+          ></textarea>
+        </div>
+
+        <!-- Actions -->
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+          <a href="vendor-management.html" class="btn btn-secondary btn-lg">
+            Cancel
+          </a>
+          <button type="submit" id="submitBtn" class="btn btn-primary btn-lg">
+            Update Vendor
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Success Confirmation Modal -->
+  <div id="vendorSuccessModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-icon success">✓</div>
+      <h2 class="modal-title">Vendor Updated!</h2>
+      <p class="modal-body">
+        Vendor details updated successfully.
+      </p>
+
+      <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">Updated Identifier:</div>
+      <div id="modalVendorId" class="modal-code-box">VEN-1001</div>
+
+      <div class="modal-actions" style="flex-direction: column; gap: 0.75rem; margin-top: 1.5rem;">
+        <a href="vendor-management.html" class="btn btn-primary btn-block btn-lg">
+          Return to Vendor Directory
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/vendors.js"></script>
+  <script>
+    // Enforce Role Guard: Only 'Admin' allowed
+    checkAuth(['Admin']);
+  </script>
+</body>
+</html>

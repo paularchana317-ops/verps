@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit Purchase Request - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="user-dashboard.html" class="brand-logo">
+        <div class="logo-badge">V</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Requester Portal</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="user-dashboard.html" class="btn btn-secondary">Dashboard</a>
+        <a href="my-requests.html" class="btn btn-secondary">My Requests</a>
+        <div class="nav-user">
+          <div class="user-info">
+            <span id="navUserName" class="user-name">Requester</span>
+            <span id="navUserRole" class="user-role-badge user">User / Requester</span>
+          </div>
+          <button onclick="logout()" class="btn btn-outline-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <div class="content-card">
+      <div class="content-header">
+        <h1>Submit Purchase Request</h1>
+        <p>Select required computer accessories, technical specifications, quantity, and delivery timeline.</p>
+      </div>
+
+      <!-- Live Error / Validation Alert -->
+      <div id="formAlert" class="alert" style="display: none;"></div>
+
+      <form id="purchaseRequestForm" novalidate>
+        <!-- Product Category (Strictly Computer Accessories) -->
+        <div class="form-group">
+          <label for="productCategory">Product Category <span class="required-star">*</span></label>
+          <select id="productCategory" class="form-control" required style="background-color: var(--primary-light); font-weight: 600; color: var(--text-main);">
+            <option value="Computer Accessories" selected>Computer Accessories</option>
+          </select>
+          <span class="form-hint">VEPRS is dedicated exclusively to Computer Accessories procurement.</span>
+        </div>
+
+        <!-- Product Name Dropdown & Quantity Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="productName">Product Name <span class="required-star">*</span></label>
+            <select id="productName" class="form-control" required>
+              <option value="">-- Select Computer Accessory --</option>
+              <option value="Keyboard">Keyboard</option>
+              <option value="Mouse">Mouse</option>
+              <option value="Monitor">Monitor</option>
+              <option value="Webcam">Webcam</option>
+              <option value="Headset">Headset</option>
+              <option value="USB Hub">USB Hub</option>
+              <option value="External Hard Drive">External Hard Drive</option>
+              <option value="SSD">SSD</option>
+              <option value="RAM">RAM</option>
+              <option value="Graphics Card">Graphics Card</option>
+              <option value="Laptop Stand">Laptop Stand</option>
+              <option value="Printer">Printer</option>
+              <option value="HDMI Cable">HDMI Cable</option>
+              <option value="USB Cable">USB Cable</option>
+              <option value="Power Adapter">Power Adapter</option>
+            </select>
+            <span class="form-hint">Choose from the approved 15 computer accessory items.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="quantity">Quantity <span class="required-star">*</span></label>
+            <input 
+              type="number" 
+              id="quantity" 
+              class="form-control" 
+              placeholder="e.g. 10" 
+              min="1" 
+              step="1" 
+              required
+            >
+            <span class="form-hint">Must be a positive integer (> 0).</span>
+          </div>
+        </div>
+
+        <!-- Product Requirements -->
+        <div class="form-group">
+          <label for="requirements">Product Requirements / Specifications <span class="required-star">*</span></label>
+          <textarea 
+            id="requirements" 
+            class="form-control" 
+            rows="3" 
+            placeholder="e.g. USB Wired, Mechanical Keys, Standard QWERTY layout, 1.5m cable length" 
+            required
+          ></textarea>
+          <span class="form-hint">Detail technical specifications, connector types, or hardware standards.</span>
+        </div>
+
+        <!-- Required Delivery Date -->
+        <div class="form-group">
+          <label for="requiredDeliveryDate">Required Delivery Date <span class="required-star">*</span></label>
+          <input 
+            type="date" 
+            id="requiredDeliveryDate" 
+            class="form-control" 
+            required
+          >
+          <span class="form-hint">Target date by which the accessories must be delivered.</span>
+        </div>
+
+        <!-- Additional Notes -->
+        <div class="form-group">
+          <label for="additionalNotes">Additional Notes (Optional)</label>
+          <textarea 
+            id="additionalNotes" 
+            class="form-control" 
+            rows="2" 
+            placeholder="e.g. Need keyboards for the computer laboratory."
+          ></textarea>
+          <span class="form-hint">Any departmental context, delivery location, or special handling instructions.</span>
+        </div>
+
+        <!-- Actions -->
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+          <a href="user-dashboard.html" class="btn btn-secondary btn-lg">
+            Cancel
+          </a>
+          <button type="submit" id="submitBtn" class="btn btn-primary btn-lg">
+            Submit Request
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Success Confirmation Modal -->
+  <div id="requestSuccessModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-icon success">✓</div>
+      <h2 class="modal-title">Request Submitted!</h2>
+      <p class="modal-body">
+        Purchase request submitted successfully.
+      </p>
+
+      <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">Assigned Tracking Identifier:</div>
+      <div id="modalRequestId" class="modal-code-box">REQ-1001</div>
+
+      <div class="modal-actions" style="flex-direction: column; gap: 0.75rem; margin-top: 1.5rem;">
+        <a href="my-requests.html" class="btn btn-primary btn-block btn-lg">
+          View in My Requests
+        </a>
+        <button onclick="window.location.reload()" class="btn btn-secondary btn-block">
+          Submit Another Request
+        </button>
+        <a href="user-dashboard.html" style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--text-muted); text-align: center;">
+          ← Return to Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/requests.js"></script>
+  <script>
+    // Enforce Role Guard: Only 'User/Requester' allowed
+    checkAuth(['User/Requester']);
+  </script>
+</body>
+</html>

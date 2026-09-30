@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request Quotation - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="admin-dashboard.html" class="brand-logo">
+        <div class="logo-badge">A</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Administrator Portal</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="admin-dashboard.html" class="btn btn-secondary">Dashboard</a>
+        <a href="purchase-requests.html" class="btn btn-secondary">Purchase Requests</a>
+        <a href="vendor-management.html" class="btn btn-secondary">Vendor Directory</a>
+        <div class="nav-user">
+          <div class="user-info">
+            <span id="navUserName" class="user-name">Admin</span>
+            <span id="navUserRole" class="user-role-badge admin">Admin</span>
+          </div>
+          <button onclick="logout()" class="btn btn-outline-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <div class="content-card" style="max-width: 850px;">
+      <div class="content-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h1>Dispatch Quotation Request</h1>
+          <p>Select qualified supplier partners to invite competitive quotation tenders.</p>
+        </div>
+        <div>
+          <span id="prDisplayId" class="request-id-tag" style="font-size: 1rem; padding: 0.35rem 0.85rem;">REQ-XXXX</span>
+        </div>
+      </div>
+
+      <!-- Purchase Request Summary Box (Ink & Paper) -->
+      <div style="background: var(--primary-light); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.35rem; margin-bottom: 2rem;">
+        <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--text-main);">Requisition Specifications</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.9rem;">
+          <div>
+            <span style="color: var(--text-muted); font-size: 0.8rem; display: block;">Product Name:</span>
+            <strong id="prProductName" style="color: var(--text-main);">Loading...</strong>
+          </div>
+          <div>
+            <span style="color: var(--text-muted); font-size: 0.8rem; display: block;">Category:</span>
+            <strong id="prCategory" style="color: var(--text-main);">Loading...</strong>
+          </div>
+          <div>
+            <span style="color: var(--text-muted); font-size: 0.8rem; display: block;">Required Quantity:</span>
+            <strong id="prQuantity" style="color: var(--text-main);">0</strong>
+          </div>
+          <div>
+            <span style="color: var(--text-muted); font-size: 0.8rem; display: block;">Target Delivery:</span>
+            <strong id="prDeliveryDate" style="color: var(--text-main);">Loading...</strong>
+          </div>
+        </div>
+        <div style="margin-top: 0.75rem; font-size: 0.85rem; border-top: 1px dashed var(--border-color); padding-top: 0.5rem;">
+          <span style="color: var(--text-muted); font-size: 0.8rem; display: block;">Technical Requirements:</span>
+          <span id="prRequirements" style="color: var(--text-body);">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Live Error / Validation Alert -->
+      <div id="formAlert" class="alert" style="display: none;"></div>
+
+      <form id="requestQuotationForm" novalidate>
+        <!-- Vendor Selection Checklist -->
+        <div class="form-group" style="margin-bottom: 1.75rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <label style="margin-bottom: 0;">Select Certified Vendors <span class="required-star">*</span></label>
+            <label style="font-size: 0.8rem; color: var(--primary); cursor: pointer; display: flex; align-items: center; gap: 0.35rem; font-weight: 600;">
+              <input type="checkbox" onchange="toggleSelectAllVendors(this)"> Select All
+            </label>
+          </div>
+          
+          <div id="vendorsCheckboxList" style="border: 1px solid var(--border-color); border-radius: var(--radius-md); max-height: 220px; overflow-y: auto; background: white;">
+            <!-- Dynamic vendor checkboxes injected by quotationRequests.js -->
+            <div style="padding: 1.5rem; text-align: center; color: var(--text-muted);">
+              ⏳ Loading active vendors...
+            </div>
+          </div>
+          <span class="form-hint">Quotation invitations will be issued to each selected vendor independently.</span>
+        </div>
+
+        <!-- Quantity & Delivery Date -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="requestedQuantity">Tender Quantity <span class="required-star">*</span></label>
+            <input 
+              type="number" 
+              id="requestedQuantity" 
+              class="form-control" 
+              min="1" 
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="requiredDeliveryDate">Required Delivery Date <span class="required-star">*</span></label>
+            <input 
+              type="date" 
+              id="requiredDeliveryDate" 
+              class="form-control" 
+              required
+            >
+          </div>
+        </div>
+
+        <!-- Requirements Specification -->
+        <div class="form-group">
+          <label for="requirements">Product Requirements & Specifications <span class="required-star">*</span></label>
+          <textarea 
+            id="requirements" 
+            class="form-control" 
+            rows="3" 
+            required
+          ></textarea>
+        </div>
+
+        <!-- Additional Message -->
+        <div class="form-group">
+          <label for="additionalMessage">Special Instructions / Message for Vendors (Optional)</label>
+          <textarea 
+            id="additionalMessage" 
+            class="form-control" 
+            rows="2" 
+            placeholder="e.g. Please include 1-year warranty and standard delivery timelines in your quote."
+          ></textarea>
+        </div>
+
+        <!-- Actions -->
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+          <a href="purchase-requests.html" class="btn btn-secondary btn-lg">
+            Cancel
+          </a>
+          <button type="submit" id="submitBtn" class="btn btn-primary btn-lg">
+            📤 Send Quotation Request
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Success Confirmation Modal -->
+  <div id="qrSuccessModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-icon success">✓</div>
+      <h2 class="modal-title">Quotation Request Sent!</h2>
+      <p class="modal-body">
+        Quotation request sent successfully to the selected vendors.
+      </p>
+
+      <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">Assigned Tracking Identifier:</div>
+      <div id="modalQRId" class="modal-code-box">QR-1001</div>
+
+      <div class="modal-actions" style="flex-direction: column; gap: 0.75rem; margin-top: 1.5rem;">
+        <a href="purchase-requests.html" class="btn btn-primary btn-block btn-lg">
+          View Purchase Requisitions
+        </a>
+        <a href="admin-dashboard.html" style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--text-muted); text-align: center;">
+          ← Return to Admin Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/quotationRequests.js"></script>
+  <script>
+    // Enforce Role Guard: Only 'Admin' allowed
+    checkAuth(['Admin']);
+  </script>
+</body>
+</html>

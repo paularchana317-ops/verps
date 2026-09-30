@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="user-dashboard.html" class="brand-logo">
+        <div class="logo-badge">V</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Requester Portal</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <div class="nav-user">
+          <div class="user-info">
+            <span id="navUserName" class="user-name">User</span>
+            <span id="navUserRole" class="user-role-badge user">User / Requester</span>
+          </div>
+          <button onclick="logout()" class="btn btn-outline-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Welcome Banner (Ink & Paper) -->
+    <div class="dashboard-welcome">
+      <div>
+        <h1>Welcome, <span id="dashboardUserName">Requester</span></h1>
+        <p>Access and manage your procurement requisitions and purchase lifecycles.</p>
+        <span id="dashboardUserRole" class="dashboard-role-badge">Role: User / Requester</span>
+      </div>
+      <div>
+        <a href="request-product.html" class="btn btn-secondary btn-lg" style="background: #FFFFFF; color: #1F1F1F !important; font-weight: 700;">
+          ➕ Request Product
+        </a>
+      </div>
+    </div>
+
+    <!-- Dashboard Modules Section -->
+    <h2 style="font-size: 1.35rem; margin-bottom: 1.25rem;">Procurement Modules</h2>
+
+    <div class="dashboard-grid">
+      <!-- 1. Request Product -->
+      <div class="dashboard-card highlight">
+        <div class="card-icon">📦</div>
+        <h3>Request Product</h3>
+        <p>Submit a new purchase requisition with product category, specifications, required quantity, and delivery timeline.</p>
+        <a href="request-product.html" class="btn btn-primary btn-block">
+          Request Product →
+        </a>
+      </div>
+
+      <!-- 2. My Requests -->
+      <div class="dashboard-card">
+        <div class="card-icon">📋</div>
+        <h3>My Requests</h3>
+        <p>Track the status, details, and submission history of all your logged purchase requisitions.</p>
+        <a href="my-requests.html" class="btn btn-secondary btn-block">
+          View My Requests →
+        </a>
+      </div>
+
+      <!-- 3. Quotations (Placeholder) -->
+      <div class="dashboard-card">
+        <span class="placeholder-tag">Upcoming</span>
+        <div class="card-icon placeholder-icon">📄</div>
+        <h3>Quotations</h3>
+        <p>Compare competitive quotation submissions received from certified suppliers and vendors.</p>
+        <button onclick="showPlaceholderNotice('Quotations')" class="btn btn-secondary btn-block">
+          Open Module
+        </button>
+      </div>
+
+      <!-- 4. Orders (Placeholder) -->
+      <div class="dashboard-card">
+        <span class="placeholder-tag">Upcoming</span>
+        <div class="card-icon placeholder-icon">🚚</div>
+        <h3>Orders</h3>
+        <p>Monitor active purchase orders, fulfillment timelines, and delivery logistics.</p>
+        <button onclick="showPlaceholderNotice('Orders')" class="btn btn-secondary btn-block">
+          Manage Orders
+        </button>
+      </div>
+
+      <!-- 5. Feedback (Placeholder) -->
+      <div class="dashboard-card">
+        <span class="placeholder-tag">Upcoming</span>
+        <div class="card-icon placeholder-icon">⭐</div>
+        <h3>Feedback</h3>
+        <p>Provide post-fulfillment quality ratings and vendor performance feedback.</p>
+        <button onclick="showPlaceholderNotice('Feedback')" class="btn btn-secondary btn-block">
+          Give Feedback
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Module Notice Modal -->
+  <div id="placeholderModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-icon" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--border-color);">📌</div>
+      <h2 id="placeholderModalTitle" class="modal-title">Module Notice</h2>
+      <div id="placeholderModalBody" class="modal-body"></div>
+      <div class="modal-actions">
+        <button onclick="closeModal('placeholderModal')" class="btn btn-primary">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script>
+    // Enforce Role Guard: Only 'User/Requester' allowed
+    checkAuth(['User/Requester']);
+  </script>
+</body>
+</html>

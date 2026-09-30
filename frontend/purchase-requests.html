@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purchase Requests - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="admin-dashboard.html" class="brand-logo">
+        <div class="logo-badge">A</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Administrator Portal</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="admin-dashboard.html" class="btn btn-secondary">Dashboard</a>
+        <a href="vendor-management.html" class="btn btn-secondary">Vendor Directory</a>
+        <div class="nav-user">
+          <div class="user-info">
+            <span id="navUserName" class="user-name">Admin</span>
+            <span id="navUserRole" class="user-role-badge admin">Admin</span>
+          </div>
+          <button onclick="logout()" class="btn btn-outline-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Header Summary -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 style="font-size: 1.85rem; margin-bottom: 0.25rem;">Purchase Requisitions</h1>
+        <p>Review organizational purchase requests and dispatch quotation requests to certified vendors.</p>
+      </div>
+      <div>
+        <span id="totalPRCount" class="badge" style="background: var(--primary-light); color: var(--primary); font-size: 0.9rem; padding: 0.4rem 0.85rem; border: 1px solid var(--border-color);">
+          0 Requests
+        </span>
+      </div>
+    </div>
+
+    <!-- Alert Banner -->
+    <div id="formAlert" class="alert" style="display: none;"></div>
+
+    <!-- Table Card -->
+    <div class="table-container">
+      <div class="table-header-bar">
+        <div style="font-weight: 700; font-size: 1.05rem; color: var(--text-main);">
+          All Departmental Requisitions
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <input 
+            type="text" 
+            id="adminPRSearchInput" 
+            class="form-control" 
+            placeholder="Search by ID, product, requester..." 
+            style="width: 280px; padding: 0.45rem 0.75rem; font-size: 0.875rem;"
+            onkeyup="filterPRTable('adminPRSearchInput', 'adminPurchaseRequestsTableBody')"
+          >
+          <button onclick="loadAdminPurchaseRequests()" class="btn btn-secondary" title="Refresh List" style="padding: 0.45rem 0.85rem;">
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="tableLoading" style="text-align: center; padding: 3rem 1rem; color: var(--text-muted); display: none;">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">⏳</div>
+        <div>Loading purchase requisitions from database...</div>
+      </div>
+
+      <!-- Table -->
+      <div style="overflow-x: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Request ID</th>
+              <th>Requester</th>
+              <th>Product Details</th>
+              <th>Quantity</th>
+              <th>Specifications</th>
+              <th>Target Delivery</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminPurchaseRequestsTableBody">
+            <!-- Dynamic rows injected by quotationRequests.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div id="tableEmpty" style="text-align: center; padding: 4rem 1.5rem; display: none;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">No purchase requests found</h3>
+        <p style="max-width: 420px; margin: 0 auto 1.5rem;">
+          No departmental purchase requests have been logged yet.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/quotationRequests.js"></script>
+  <script>
+    // Enforce Role Guard: Only 'Admin' allowed
+    checkAuth(['Admin']);
+  </script>
+</body>
+</html>

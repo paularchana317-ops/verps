@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Quotation Request - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="vendor-dashboard.html" class="brand-logo">
+        <div class="logo-badge">V</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Supplier Portal</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="vendor-dashboard.html" class="btn btn-secondary">Dashboard</a>
+        <a href="vendor-quotation-requests.html" class="btn btn-secondary">Quotation Requests</a>
+        <div class="nav-user">
+          <div class="user-info">
+            <span id="navUserName" class="user-name">Vendor</span>
+            <span id="navUserRole" class="user-role-badge vendor">Vendor</span>
+          </div>
+          <button onclick="logout()" class="btn btn-outline-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <div class="content-card" style="max-width: 850px;">
+      <div class="content-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h1>Quotation Request Details</h1>
+          <p>Review the technical requirements and delivery criteria sent by the Admin.</p>
+        </div>
+        <div style="text-align: right;">
+          <span id="viewQRId" class="request-id-tag" style="font-size: 1.05rem; padding: 0.4rem 0.95rem;">
+            QR-XXXX
+          </span>
+          <div id="viewStatusBadge" style="margin-top: 0.4rem;">
+            <span class="badge badge-pending">Pending</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert Box -->
+      <div id="formAlert" class="alert" style="display: none;"></div>
+
+      <!-- Detailed Specification Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; background: var(--primary-light); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem; margin-bottom: 1.75rem;">
+        <div>
+          <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 0.25rem;">Purchase Request Ref</span>
+          <strong id="viewPRCode" style="font-family: monospace; font-size: 1.1rem; color: var(--primary);">--</strong>
+        </div>
+        <div>
+          <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 0.25rem;">Product Name</span>
+          <strong id="viewProductName" style="font-size: 1.1rem; color: var(--text-main);">--</strong>
+        </div>
+        <div>
+          <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 0.25rem;">Product Category</span>
+          <span id="viewCategory" class="badge" style="background: var(--bg-card); color: var(--primary); font-size: 0.85rem; border: 1px solid var(--border-color);">Computer Accessories</span>
+        </div>
+        <div>
+          <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 0.25rem;">Tender Quantity</span>
+          <strong id="viewQuantity" style="font-size: 1.25rem; color: var(--text-main);">0</strong> units
+        </div>
+        <div>
+          <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 0.25rem;">Required Delivery Date</span>
+          <strong id="viewDeliveryDate" style="color: var(--text-main);">--</strong>
+        </div>
+        <div>
+          <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 0.25rem;">Invitation Date</span>
+          <span id="viewRequestDate" style="color: var(--text-muted);">--</span>
+        </div>
+      </div>
+
+      <!-- Full Technical Requirements Box -->
+      <div style="margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.05rem; margin-bottom: 0.5rem; color: var(--text-main);">Technical Specifications & Requirements:</h3>
+        <div id="viewRequirements" style="background: white; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; font-size: 0.95rem; line-height: 1.6; color: var(--text-body);">
+          Loading requirements...
+        </div>
+      </div>
+
+      <!-- Additional Message from Admin -->
+      <div id="additionalMessageContainer" style="margin-bottom: 2rem; display: none;">
+        <h3 style="font-size: 1.05rem; margin-bottom: 0.5rem; color: var(--text-main);">Special Message from Admin:</h3>
+        <div id="viewAdditionalMessage" style="background: var(--warning-light); border: 1px solid var(--warning-subtle); border-radius: var(--radius-md); padding: 1rem 1.25rem; font-size: 0.9rem; color: var(--warning-text);">
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <a href="vendor-quotation-requests.html" class="btn btn-secondary btn-lg">
+          ← Back to Quotation Requests
+        </a>
+        <div id="actionButtonContainer">
+          <!-- Dynamic Submit Quotation button or Submitted badge -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/quotationRequests.js"></script>
+  <script>
+    // Enforce Role Guard: Only 'Vendor' allowed
+    checkAuth(['Vendor']);
+    document.addEventListener('DOMContentLoaded', () => {
+      initViewQuotationRequest();
+    });
+  </script>
+</body>
+</html>
