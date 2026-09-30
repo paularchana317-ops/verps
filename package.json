@@ -1,10 +1,11 @@
 {
   "name": "veprs",
   "version": "1.0.0",
-  "description": "Vendor Evaluation and Purchase Recommendation System (VEPRS) - Sprint 1",
+  "description": "Vendor Evaluation and Purchase Recommendation System (VEPRS)",
   "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
+    "build": "npm rebuild sqlite3 --build-from-source",
     "dev": "nodemon backend/server.js"
   },
   "keywords": [
@@ -13,9 +14,10 @@
     "purchase-recommendation",
     "procurement",
     "express",
-    "mysql"
+    "mysql",
+    "sqlite3"
   ],
-  "author": "",
+  "author": "Paul Archana",
   "license": "ISC",
   "dependencies": {
     "@isomorphic-git/lightning-fs": "^4.10.3",
@@ -26,7 +28,7 @@
     "isomorphic-git": "^1.42.4",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.11.5",
-    "sqlite3": "^6.0.1"
+    "sqlite3": "5.1.7"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
