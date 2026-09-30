@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const dotenv = require('dotenv');
 const { initDB } = require('./config/db');
+const { connectMongoDB, isMongoConnected } = require('./config/mongodb');
 
 // Load environment variables
 dotenv.config();
@@ -33,6 +34,10 @@ app.get('/api/health', (req, res) => {
     status: 'online',
     system: 'Vendor Evaluation and Purchase Recommendation System (VEPRS)',
     sprint: 2,
+    database: {
+      mongodb: isMongoConnected() ? 'connected' : 'fallback_mode',
+      sql: 'initialized'
+    },
     timestamp: new Date().toISOString()
   });
 });
@@ -51,15 +56,18 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start Server & Initialize Database
+// Start Server & Initialize Databases
 app.listen(PORT, async () => {
   console.log('========================================================');
   console.log(` VEPRS Backend Server running on: http://localhost:${PORT}`);
   console.log(` Frontend Web Application: http://localhost:${PORT}`);
   console.log('========================================================');
   
-  // Initialize database & tables
+  // 1. Initialize SQL / SQLite tables for relational features
   await initDB();
+
+  // 2. Initialize MongoDB Atlas Cloud Connection & seed test accounts
+  await connectMongoDB();
 });
 
 module.exports = app;

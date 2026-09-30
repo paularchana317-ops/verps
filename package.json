@@ -27,6 +27,7 @@
     "express": "^4.21.2",
     "isomorphic-git": "^1.42.4",
     "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.24.4",
     "mysql2": "^3.11.5",
     "sqlite3": "5.1.7"
   },

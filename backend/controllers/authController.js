@@ -1,14 +1,28 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { pool } = require('../config/db');
+const { isMongoConnected } = require('../config/mongodb');
+const User = require('../models/User');
 const { generateVendorId } = require('./vendorController');
 
-// Valid roles
-const VALID_ROLES = ['Admin', 'User/Requester', 'Vendor'];
+// Supported roles
+const VALID_ROLES = ['Admin', 'User/Requester', 'Vendor', 'admin', 'user', 'vendor'];
+
+/**
+ * Normalize role to standard VEPRS casing
+ */
+function canonicalRole(role) {
+  if (!role) return 'User/Requester';
+  const r = role.toString().toLowerCase().trim();
+  if (r === 'admin') return 'Admin';
+  if (r === 'vendor') return 'Vendor';
+  if (r.includes('user') || r.includes('requester')) return 'User/Requester';
+  return role;
+}
 
 /**
  * Register a new user or vendor account
- * When role === 'Vendor', automatically creates user + vendor profile in unified vendors list.
+ * Stores user permanently in MongoDB Atlas (and syncs with local tables for relational consistency).
  */
 async function register(req, res) {
   let connection;
@@ -25,9 +39,9 @@ async function register(req, res) {
       address, 
       city, 
       state, 
-      productCategories,
-      businessRegistrationNumber,
-      description
+      productCategories, 
+      businessRegistrationNumber, 
+      description 
     } = req.body;
 
     // 1. Validate required fields
@@ -62,9 +76,11 @@ async function register(req, res) {
     if (!VALID_ROLES.includes(role)) {
       return res.status(400).json({
         success: false,
-        message: `Invalid role selected. Allowed roles: ${VALID_ROLES.join(', ')}`
+        message: `Invalid role selected. Allowed roles: Admin, User/Requester, Vendor`
       });
     }
+
+    const normalizedRole = canonicalRole(role);
 
     // 5. Check password matching
     if (password !== confirmPassword) {
@@ -91,31 +107,46 @@ async function register(req, res) {
       });
     }
 
-    // 7. Check if email already exists in users or vendors table
-    const [existingUsers] = await pool.query(
-      'SELECT id FROM users WHERE LOWER(email) = ? LIMIT 1',
-      [trimmedEmail]
-    );
-
-    if (existingUsers.length > 0) {
-      return res.status(409).json({
-        success: false,
-        message: role === 'Vendor' 
-          ? 'Vendor with this email already exists. Please login instead.' 
-          : 'An account with this email already exists. Please login instead.'
-      });
+    // 7. Check if email already exists in MongoDB Atlas
+    if (isMongoConnected()) {
+      const existingMongoUser = await User.findOne({ email: trimmedEmail });
+      if (existingMongoUser) {
+        return res.status(409).json({
+          success: false,
+          message: normalizedRole === 'Vendor' 
+            ? 'Vendor with this email already exists. Please login instead.' 
+            : 'An account with this email already exists. Please login instead.'
+        });
+      }
     }
 
-    const [existingVendors] = await pool.query(
-      'SELECT id FROM vendors WHERE LOWER(email) = ? LIMIT 1',
-      [trimmedEmail]
-    );
+    // Also check SQL users & vendors table
+    try {
+      const [existingSqlUsers] = await pool.query(
+        'SELECT id FROM users WHERE LOWER(email) = ? LIMIT 1',
+        [trimmedEmail]
+      );
+      if (existingSqlUsers.length > 0) {
+        return res.status(409).json({
+          success: false,
+          message: normalizedRole === 'Vendor' 
+            ? 'Vendor with this email already exists. Please login instead.' 
+            : 'An account with this email already exists. Please login instead.'
+        });
+      }
 
-    if (existingVendors.length > 0) {
-      return res.status(409).json({
-        success: false,
-        message: 'Vendor with this email already exists. Please login instead.'
-      });
+      const [existingVendors] = await pool.query(
+        'SELECT id FROM vendors WHERE LOWER(email) = ? LIMIT 1',
+        [trimmedEmail]
+      );
+      if (existingVendors.length > 0) {
+        return res.status(409).json({
+          success: false,
+          message: 'Vendor with this email already exists. Please login instead.'
+        });
+      }
+    } catch (sqlCheckErr) {
+      // Non-blocking if table is initializing
     }
 
     // 8. Hash password using bcrypt
@@ -125,18 +156,34 @@ async function register(req, res) {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    // 9. Insert into users table
+    // 9. Generate vendor ID if role is Vendor
+    let generatedVendorId = null;
+    if (normalizedRole === 'Vendor') {
+      generatedVendorId = await generateVendorId(connection);
+    }
+
+    // 10. Store user in MongoDB Atlas
+    let mongoUserId = null;
+    if (isMongoConnected()) {
+      const newMongoUser = await User.create({
+        name: trimmedName,
+        email: trimmedEmail,
+        password: hashedPassword,
+        role: normalizedRole,
+        vendorId: generatedVendorId
+      });
+      mongoUserId = newMongoUser._id.toString();
+    }
+
+    // 11. Insert into SQL users table (maintains relational integrity for existing Sprint 1 & 2 foreign keys)
     const [userResult] = await connection.query(
       'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [trimmedName, trimmedEmail, hashedPassword, role]
+      [trimmedName, trimmedEmail, hashedPassword, normalizedRole]
     );
-    const userId = userResult.insertId;
+    const sqlUserId = userResult.insertId;
 
-    let generatedVendorId = null;
-
-    // 10. If Role is Vendor, automatically generate Vendor ID and create record in vendors table
-    if (role === 'Vendor') {
-      generatedVendorId = await generateVendorId(connection);
+    // 12. If Role is Vendor, create entry in vendors table
+    if (normalizedRole === 'Vendor') {
       const finalVendorName = (vendorName && vendorName.trim()) 
         ? vendorName.trim() 
         : ((companyName && companyName.trim()) ? companyName.trim() : trimmedName);
@@ -172,12 +219,13 @@ async function register(req, res) {
 
     return res.status(201).json({
       success: true,
-      message: role === 'Vendor' 
+      message: normalizedRole === 'Vendor' 
         ? `Vendor registration successful! Assigned Vendor ID: ${generatedVendorId}. You can now log in.` 
         : 'Registration successful! You can now log in with your credentials.',
-      userId: userId,
+      userId: mongoUserId || sqlUserId,
       vendorId: generatedVendorId
     });
+
   } catch (err) {
     if (connection) {
       await connection.rollback();
@@ -192,7 +240,8 @@ async function register(req, res) {
 }
 
 /**
- * User / Vendor Login (Authenticates existing account, NEVER creates duplicates)
+ * User / Vendor Login
+ * Queries MongoDB Atlas users collection as the source of truth.
  */
 async function login(req, res) {
   try {
@@ -208,22 +257,36 @@ async function login(req, res) {
 
     const trimmedEmail = email.trim().toLowerCase();
 
-    // 2. Fetch user by email
-    const [users] = await pool.query(
-      'SELECT id, name, email, password, role, created_at FROM users WHERE LOWER(email) = ? LIMIT 1',
-      [trimmedEmail]
-    );
+    // 2. Fetch user - checks MongoDB Atlas first
+    let user = null;
+    let isFromMongo = false;
 
-    if (users.length === 0) {
+    if (isMongoConnected()) {
+      user = await User.findOne({ email: trimmedEmail });
+      if (user) {
+        isFromMongo = true;
+      }
+    }
+
+    // Fallback to local SQL database if not in MongoDB or MongoDB URI not yet set
+    if (!user) {
+      const [sqlUsers] = await pool.query(
+        'SELECT id, name, email, password, role, created_at FROM users WHERE LOWER(email) = ? LIMIT 1',
+        [trimmedEmail]
+      );
+      if (sqlUsers.length > 0) {
+        user = sqlUsers[0];
+      }
+    }
+
+    if (!user) {
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password.'
       });
     }
 
-    const user = users[0];
-
-    // 3. Verify password
+    // 3. Verify password with bcrypt
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -232,40 +295,49 @@ async function login(req, res) {
       });
     }
 
-    // 4. If role is Vendor, load existing vendor profile without creating duplicate records
-    let vendorData = null;
-    if (user.role === 'Vendor') {
-      const [vendorRows] = await pool.query(
-        'SELECT id, vendor_id, vendor_name, email, phone, product_categories, status FROM vendors WHERE LOWER(email) = ? LIMIT 1',
-        [trimmedEmail]
-      );
+    // 4. Normalize role
+    const normRole = canonicalRole(user.role);
 
-      if (vendorRows.length > 0) {
-        vendorData = vendorRows[0];
+    // 5. If role is Vendor, load vendor profile
+    let vendorData = null;
+    if (normRole === 'Vendor') {
+      try {
+        const [vendorRows] = await pool.query(
+          'SELECT id, vendor_id, vendor_name, email, phone, product_categories, status FROM vendors WHERE LOWER(email) = ? LIMIT 1',
+          [trimmedEmail]
+        );
+        if (vendorRows.length > 0) {
+          vendorData = vendorRows[0];
+        }
+      } catch (e) {
+        // Fallback vendor data
       }
     }
 
-    // 5. Generate JWT Token
+    // 6. Generate JWT Token
     const jwtSecret = process.env.JWT_SECRET || 'veprs_super_secure_jwt_secret_key_2026_auth';
     const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
 
+    const userIdStr = user._id ? user._id.toString() : (user.id ? String(user.id) : '');
+    const vendorIdStr = user.vendorId || (vendorData ? vendorData.vendor_id : null);
+
     const tokenPayload = {
-      id: user.id,
+      id: userIdStr,
       name: user.name,
       email: user.email,
-      role: user.role,
-      vendorId: vendorData ? vendorData.vendor_id : null
+      role: normRole,
+      vendorId: vendorIdStr
     };
 
     const token = jwt.sign(tokenPayload, jwtSecret, { expiresIn });
 
-    // 6. Determine redirect URL based on role
+    // 7. Determine redirect URL based on verified role
     let redirectUrl = '/user-dashboard.html';
-    if (user.role === 'Admin') {
+    if (normRole === 'Admin') {
       redirectUrl = '/admin-dashboard.html';
-    } else if (user.role === 'Vendor') {
+    } else if (normRole === 'Vendor') {
       redirectUrl = '/vendor-dashboard.html';
-    } else if (user.role === 'User/Requester') {
+    } else {
       redirectUrl = '/user-dashboard.html';
     }
 
@@ -274,16 +346,17 @@ async function login(req, res) {
       message: 'Login successful.',
       token,
       user: {
-        id: user.id,
+        id: userIdStr,
         name: user.name,
         email: user.email,
-        role: user.role,
-        vendorId: vendorData ? vendorData.vendor_id : null,
-        vendorName: vendorData ? vendorData.vendor_name : null,
+        role: normRole,
+        vendorId: vendorIdStr,
+        vendorName: vendorData ? vendorData.vendor_name : user.name,
         status: vendorData ? vendorData.status : 'Active'
       },
       redirectUrl
     });
+
   } catch (err) {
     console.error('[Auth Login Error]:', err);
     return res.status(500).json({
@@ -298,39 +371,55 @@ async function login(req, res) {
  */
 async function getProfile(req, res) {
   try {
-    const userId = req.user.id;
-    const [users] = await pool.query(
-      'SELECT id, name, email, role, created_at FROM users WHERE id = ? LIMIT 1',
-      [userId]
-    );
+    const userEmail = req.user.email ? req.user.email.toLowerCase() : null;
+    let user = null;
 
-    if (users.length === 0) {
+    if (isMongoConnected() && userEmail) {
+      user = await User.findOne({ email: userEmail });
+    }
+
+    if (!user) {
+      const userId = req.user.id;
+      const [sqlUsers] = await pool.query(
+        'SELECT id, name, email, role, created_at FROM users WHERE id = ? OR LOWER(email) = ? LIMIT 1',
+        [userId, userEmail]
+      );
+      if (sqlUsers.length > 0) {
+        user = sqlUsers[0];
+      }
+    }
+
+    if (!user) {
       return res.status(404).json({
         success: false,
         message: 'User not found.'
       });
     }
 
-    const user = users[0];
+    const normRole = canonicalRole(user.role);
     let vendorData = null;
 
-    if (user.role === 'Vendor') {
-      const [vendorRows] = await pool.query(
-        'SELECT id, vendor_id, vendor_name, contact_person, email, phone, address, city, state, product_categories, business_registration_number, description, status FROM vendors WHERE LOWER(email) = ? LIMIT 1',
-        [user.email.toLowerCase()]
-      );
-      if (vendorRows.length > 0) {
-        vendorData = vendorRows[0];
+    if (normRole === 'Vendor') {
+      try {
+        const [vendorRows] = await pool.query(
+          'SELECT id, vendor_id, vendor_name, contact_person, email, phone, address, city, state, product_categories, business_registration_number, description, status FROM vendors WHERE LOWER(email) = ? LIMIT 1',
+          [user.email.toLowerCase()]
+        );
+        if (vendorRows.length > 0) {
+          vendorData = vendorRows[0];
+        }
+      } catch (e) {
+        // Ignored
       }
     }
 
     return res.status(200).json({
       success: true,
       user: {
-        id: user.id,
+        id: user._id ? user._id.toString() : user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: normRole,
         vendorProfile: vendorData
       }
     });
