@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compare Vendors - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="admin-dashboard.html" class="brand-logo">
+        <div class="logo-badge">V</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Evaluation & Ranking</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="admin-dashboard.html" class="btn btn-secondary">Dashboard</a>
+        <a href="vendor-evaluation.html" class="btn btn-secondary">Evaluate</a>
+        <a href="compare-vendors.html" class="btn btn-secondary" style="border-color: var(--primary); font-weight: 700;">Compare</a>
+        <a href="vendor-recommendation.html" class="btn btn-primary" style="background: var(--primary); color: #FFFFFF !important;">⭐ Recommendations</a>
+        <div class="nav-user">
+          <div class="user-info">
+            <span id="navUserName" class="user-name">User</span>
+            <span id="navUserRole" class="user-role-badge admin">Admin</span>
+          </div>
+          <button onclick="logout()" class="btn btn-outline-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Header Summary -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <span class="placeholder-tag" style="background: var(--primary-light); color: var(--primary); border-color: var(--border-color); margin-bottom: 0.5rem;">
+          SCRUM-27: Multi-Vendor Benchmarking
+        </span>
+        <h1 style="font-size: 1.85rem; margin-top: 0.35rem;">Vendor Comparison</h1>
+        <p>Benchmark vendors side-by-side using quotation metrics, individual criteria scores, and composite rankings.</p>
+      </div>
+      <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <span id="totalCompareCount" class="badge" style="background: var(--primary-light); color: var(--primary); font-size: 0.9rem; padding: 0.4rem 0.85rem; border: 1px solid var(--border-color);">
+          0 Vendors
+        </span>
+        <a href="vendor-evaluation.html" class="btn btn-secondary">
+          ➕ Evaluate Vendor
+        </a>
+        <a href="vendor-recommendation.html" class="btn btn-primary">
+          🏆 Top Recommendation →
+        </a>
+      </div>
+    </div>
+
+    <!-- Alert Banner -->
+    <div id="formAlert" class="alert" style="display: none;"></div>
+
+    <!-- Highlighted Best Vendor Banner -->
+    <div id="bestVendorBanner" style="display: none; background: #FEFDF9; border: 2px solid #F59E0B; border-radius: var(--radius-lg); padding: 1.5rem 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-sm);">
+      <!-- Dynamically injected by comparison.js -->
+    </div>
+
+    <!-- Scoring Formula Rationale Box -->
+    <div style="background: var(--primary-subtle); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem 1.5rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+      <div>
+        📐 <strong>Evaluation Scoring Formula:</strong> Overall Score = (Price Score × 40%) + (Quality Score × 35%) + (Delivery Score × 25%)
+      </div>
+      <div style="color: var(--text-body); font-weight: 600;">
+        Tie-breaker: Quality Score → Delivery Score → Price
+      </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="table-container">
+      <div class="table-header-bar">
+        <div style="font-weight: 700; font-size: 1.05rem; color: var(--text-main);">
+          Vendor Benchmarking Matrix
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <input 
+            type="text" 
+            id="compareSearchInput" 
+            class="form-control" 
+            placeholder="Filter by vendor name, category, ID..." 
+            style="width: 280px; padding: 0.45rem 0.75rem; font-size: 0.875rem;"
+            onkeyup="filterComparisonTable()"
+          >
+          <button onclick="loadComparisonData()" class="btn btn-secondary" title="Refresh List" style="padding: 0.45rem 0.85rem;">
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="tableLoading" style="text-align: center; padding: 3rem 1rem; color: var(--text-muted); display: none;">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">⏳</div>
+        <div>Loading vendor comparison data from MongoDB...</div>
+      </div>
+
+      <!-- Comparison Table -->
+      <div style="overflow-x: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Vendor Details</th>
+              <th>Quote Price</th>
+              <th>Delivery Lead</th>
+              <th>Price Score (40%)</th>
+              <th>Quality Score (35%)</th>
+              <th>Delivery Score (25%)</th>
+              <th>Overall Score</th>
+              <th>Rating</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="comparisonTableBody">
+            <!-- Dynamically populated by comparison.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div id="tableEmpty" style="text-align: center; padding: 4rem 1.5rem; display: none;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">⚖️</div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">No active vendors found</h3>
+        <p style="max-width: 440px; margin: 0 auto 1.5rem;">
+          No active vendors found in the database.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/comparison.js"></script>
+  <script>
+    // Role Guard: Accessible by Admin and User/Requester
+    checkAuth(['Admin', 'User/Requester']);
+  </script>
+</body>
+</html>

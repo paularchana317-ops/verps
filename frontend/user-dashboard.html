@@ -18,6 +18,9 @@
         </div>
       </a>
       <div class="nav-links">
+        <a href="my-requests.html" class="btn btn-secondary">My Requests</a>
+        <a href="compare-vendors.html" class="btn btn-secondary">Compare</a>
+        <a href="vendor-recommendation.html" class="btn btn-primary" style="background: var(--primary); color: #FFFFFF !important;">⭐ Recommendations</a>
         <div class="nav-user">
           <div class="user-info">
             <span id="navUserName" class="user-name">User</span>
@@ -35,7 +38,7 @@
     <div class="dashboard-welcome">
       <div>
         <h1>Welcome, <span id="dashboardUserName">Requester</span></h1>
-        <p>Access and manage your procurement requisitions and purchase lifecycles.</p>
+        <p>Access and manage your procurement requisitions, compare vendor quotes, and view best supplier recommendations.</p>
         <span id="dashboardUserRole" class="dashboard-role-badge">Role: User / Requester</span>
       </div>
       <div>
@@ -60,27 +63,46 @@
       </div>
 
       <!-- 2. My Requests -->
-      <div class="dashboard-card">
+      <div class="dashboard-card highlight">
         <div class="card-icon">📋</div>
         <h3>My Requests</h3>
         <p>Track the status, details, and submission history of all your logged purchase requisitions.</p>
-        <a href="my-requests.html" class="btn btn-secondary btn-block">
+        <a href="my-requests.html" class="btn btn-primary btn-block">
           View My Requests →
         </a>
       </div>
 
-      <!-- 3. Quotations (Placeholder) -->
-      <div class="dashboard-card">
-        <span class="placeholder-tag">Upcoming</span>
-        <div class="card-icon placeholder-icon">📄</div>
-        <h3>Quotations</h3>
-        <p>Compare competitive quotation submissions received from certified suppliers and vendors.</p>
-        <button onclick="showPlaceholderNotice('Quotations')" class="btn btn-secondary btn-block">
-          Open Module
-        </button>
+      <!-- 3. Compare Vendors (Sprint 3: SCRUM-27) -->
+      <div class="dashboard-card highlight">
+        <div class="card-icon">📊</div>
+        <h3>Compare Vendors</h3>
+        <p>Benchmark vendors side-by-side using quotation metrics, individual criteria scores, and composite rankings.</p>
+        <a href="compare-vendors.html" class="btn btn-primary btn-block">
+          Compare Matrix →
+        </a>
       </div>
 
-      <!-- 4. Orders (Placeholder) -->
+      <!-- 4. Vendor Recommendations (Sprint 3: SCRUM-28) -->
+      <div class="dashboard-card highlight">
+        <div class="card-icon">🏆</div>
+        <h3>Vendor Recommendations</h3>
+        <p>View the highest-ranked vendor recommendation and ranked alternatives generated from MongoDB evaluations.</p>
+        <a href="vendor-recommendation.html" class="btn btn-primary btn-block">
+          View Recommendations →
+        </a>
+      </div>
+
+      <!-- 5. Evaluate Vendors (Sprint 3: SCRUM-26) -->
+      <div class="dashboard-card highlight">
+        <div class="card-icon">⚖️</div>
+        <h3>Vendor Evaluation</h3>
+        <p>Evaluate vendor quotes on Price (40%), Quality (35%), and Delivery (25%) with automatic composite scoring.</p>
+        <a href="vendor-evaluation.html" class="btn btn-primary btn-block">
+          Evaluate Vendors →
+        </a>
+      </div>
+
+      <!-- 6. Orders (Placeholder) -->
       <div class="dashboard-card">
         <span class="placeholder-tag">Upcoming</span>
         <div class="card-icon placeholder-icon">🚚</div>
@@ -88,17 +110,6 @@
         <p>Monitor active purchase orders, fulfillment timelines, and delivery logistics.</p>
         <button onclick="showPlaceholderNotice('Orders')" class="btn btn-secondary btn-block">
           Manage Orders
-        </button>
-      </div>
-
-      <!-- 5. Feedback (Placeholder) -->
-      <div class="dashboard-card">
-        <span class="placeholder-tag">Upcoming</span>
-        <div class="card-icon placeholder-icon">⭐</div>
-        <h3>Feedback</h3>
-        <p>Provide post-fulfillment quality ratings and vendor performance feedback.</p>
-        <button onclick="showPlaceholderNotice('Feedback')" class="btn btn-secondary btn-block">
-          Give Feedback
         </button>
       </div>
     </div>

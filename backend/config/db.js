@@ -247,9 +247,56 @@ function initSQLite(db) {
           FOREIGN KEY (purchase_request_id) REFERENCES purchase_requests(id) ON DELETE CASCADE,
           FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE
         );
+      `);
+
+      // 6. evaluations table (Sprint 3)
+      db.run(`
+        CREATE TABLE IF NOT EXISTS evaluations (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          evaluation_id TEXT NOT NULL UNIQUE,
+          vendor_id INTEGER NOT NULL,
+          vendor_code TEXT NOT NULL,
+          vendor_name TEXT NOT NULL,
+          quotation_id TEXT,
+          evaluator_id TEXT NOT NULL,
+          evaluator_name TEXT NOT NULL,
+          price_score REAL NOT NULL,
+          quality_score REAL NOT NULL,
+          delivery_score REAL NOT NULL,
+          overall_score REAL NOT NULL,
+          feedback TEXT,
+          status TEXT NOT NULL DEFAULT 'Completed',
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE
+        );
+      `);
+
+      // 7. recommendations table (Sprint 3)
+      db.run(`
+        CREATE TABLE IF NOT EXISTS recommendations (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          recommendation_id TEXT NOT NULL UNIQUE,
+          vendor_id INTEGER NOT NULL,
+          vendor_code TEXT NOT NULL,
+          vendor_name TEXT NOT NULL,
+          overall_score REAL NOT NULL,
+          price_score REAL NOT NULL,
+          quality_score REAL NOT NULL,
+          delivery_score REAL NOT NULL,
+          rank INTEGER NOT NULL DEFAULT 1,
+          product_categories TEXT DEFAULT 'Computer Accessories',
+          city TEXT,
+          state TEXT,
+          summary TEXT,
+          status TEXT NOT NULL DEFAULT 'Active',
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE
+        );
       `, (err) => {
         if (err) return reject(err);
-        console.log('[DB] Local SQLite database verified with Sprint 1 & Sprint 2 tables.');
+        console.log('[DB] Local SQLite database verified with Sprint 1, Sprint 2 & Sprint 3 tables.');
         resolve();
       });
     });
@@ -413,9 +460,62 @@ async function initDB() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
+    // 6. evaluations table (Sprint 3)
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS evaluations (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        evaluation_id VARCHAR(50) NOT NULL UNIQUE,
+        vendor_id INT NOT NULL,
+        vendor_code VARCHAR(50) NOT NULL,
+        vendor_name VARCHAR(150) NOT NULL,
+        quotation_id VARCHAR(50) NULL,
+        evaluator_id VARCHAR(50) NOT NULL,
+        evaluator_name VARCHAR(100) NOT NULL,
+        price_score DECIMAL(5,2) NOT NULL,
+        quality_score DECIMAL(5,2) NOT NULL,
+        delivery_score DECIMAL(5,2) NOT NULL,
+        overall_score DECIMAL(5,2) NOT NULL,
+        feedback TEXT NULL,
+        status VARCHAR(50) NOT NULL DEFAULT 'Completed',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        CONSTRAINT fk_evaluations_vendor_id
+          FOREIGN KEY (vendor_id) REFERENCES vendors(id)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    // 7. recommendations table (Sprint 3)
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS recommendations (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        recommendation_id VARCHAR(50) NOT NULL UNIQUE,
+        vendor_id INT NOT NULL,
+        vendor_code VARCHAR(50) NOT NULL,
+        vendor_name VARCHAR(150) NOT NULL,
+        overall_score DECIMAL(5,2) NOT NULL,
+        price_score DECIMAL(5,2) NOT NULL,
+        quality_score DECIMAL(5,2) NOT NULL,
+        delivery_score DECIMAL(5,2) NOT NULL,
+        rank INT NOT NULL DEFAULT 1,
+        product_categories VARCHAR(150) DEFAULT 'Computer Accessories',
+        city VARCHAR(100) NULL,
+        state VARCHAR(100) NULL,
+        summary TEXT NULL,
+        status VARCHAR(50) NOT NULL DEFAULT 'Active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        CONSTRAINT fk_recommendations_vendor_id
+          FOREIGN KEY (vendor_id) REFERENCES vendors(id)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
     conn.release();
     activeMode = 'mysql';
-    console.log('[DB] MySQL database & all tables verified successfully.');
+    console.log('[DB] MySQL database & all Sprint 1, 2, 3 tables verified successfully.');
   } catch (err) {
     activeMode = 'sqlite';
     console.log('[DB Notice] MySQL server is offline or unreachable (' + err.message + ').');

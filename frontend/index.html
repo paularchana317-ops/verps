@@ -49,16 +49,38 @@
       </div>
     </div>
 
-    <!-- Section 1: Evaluated & Recommended Vendors (Public Showcase) -->
+    <!-- MANDATORY SPRINT 3 REQUIREMENT: Best Evaluated / Recommended Vendor Showcase (BEFORE LOGIN) -->
+    <div style="margin: 3rem 0 1rem 0;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+        <div>
+          <span class="placeholder-tag" style="background: var(--warning-light); color: var(--warning-text); border-color: var(--warning-subtle);">
+            ⭐ SPRINT 3 ENGINE
+          </span>
+          <h2 style="font-size: 1.75rem; margin-top: 0.35rem;">Recommended Vendor</h2>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">
+            Dynamically computed from actual MongoDB evaluation scores across Price (40%), Quality (35%), and Delivery (25%).
+          </p>
+        </div>
+      </div>
+
+      <!-- Dynamic Best Vendor Container -->
+      <div id="homepageRecommendationContainer">
+        <div style="text-align: center; padding: 3rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); color: var(--text-muted);">
+          ⏳ Loading best evaluated vendor recommendation from database...
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 1: Evaluated & Recommended Vendors (Public Directory) -->
     <div style="margin: 3.5rem 0 2rem 0;">
       <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
         <div>
-          <span class="placeholder-tag" style="background: var(--warning-light); color: var(--warning-text); border-color: var(--warning-subtle);">
+          <span class="placeholder-tag" style="background: var(--primary-light); color: var(--primary); border-color: var(--border-color);">
             Verified Supplier Directory
           </span>
-          <h2 style="font-size: 1.75rem; margin-top: 0.35rem;">Evaluated & Recommended Vendors</h2>
+          <h2 style="font-size: 1.75rem; margin-top: 0.35rem;">Active Supplier Directory</h2>
           <p style="color: var(--text-muted); font-size: 0.95rem;">
-            Certified enterprise vendors specializing in Computer Accessories.
+            Certified enterprise suppliers specializing in Computer Accessories.
           </p>
         </div>
         <a href="login.html" class="btn btn-secondary" style="font-size: 0.85rem;">
@@ -69,7 +91,7 @@
       <!-- Dynamic Vendors Grid -->
       <div id="vendorShowcaseContainer" class="vendor-showcase-grid">
         <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted);">
-          Loading recommended vendors...
+          Loading vendor directory...
         </div>
       </div>
     </div>
@@ -80,7 +102,7 @@
         <span class="placeholder-tag">System Modules</span>
         <h2 style="font-size: 1.75rem; margin-top: 0.35rem;">End-to-End Procurement Flow</h2>
         <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 600px; margin: 0 auto;">
-          From user purchase requests and admin RFQ tenders to vendor quotations and automated price calculations.
+          From user purchase requests and admin RFQ tenders to vendor quotations, multi-criteria evaluations, and automated purchase recommendations.
         </p>
       </div>
 
@@ -104,13 +126,35 @@
         </div>
 
         <div class="dashboard-card">
-          <div class="card-icon">💰</div>
-          <h3>Instant Quote Submissions</h3>
-          <p>Vendors submit unit pricing with live total price computation (QUO-1001) and duplicate tender guards.</p>
+          <div class="card-icon">⚖️</div>
+          <h3>Multi-Factor Evaluation</h3>
+          <p>Evaluate vendors on Price (40%), Quality (35%), and Delivery (25%) with automatic composite scoring.</p>
         </div>
       </div>
     </div>
   </main>
+
+  <!-- Vendor Details Modal -->
+  <div id="vendorDetailsModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 540px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+        <div>
+          <span class="rank-badge rank-1">⭐ BEST EVALUATED VENDOR</span>
+          <h2 id="modalVendorName" style="font-size: 1.35rem; margin-top: 0.25rem; color: var(--text-main);">Vendor Details</h2>
+        </div>
+        <span id="modalVendorId" class="request-id-tag">VEN-1001</span>
+      </div>
+
+      <div id="modalDetailsBody" style="font-size: 0.9rem; color: var(--text-body); margin-bottom: 1.5rem;">
+        <!-- Injected dynamically -->
+      </div>
+
+      <div class="modal-actions" style="justify-content: flex-end;">
+        <button onclick="closeModal('vendorDetailsModal')" class="btn btn-secondary">Close</button>
+        <a href="login.html" class="btn btn-primary">Sign In / Register →</a>
+      </div>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer class="footer">
@@ -125,12 +169,138 @@
       const navActions = document.getElementById('navActions');
       if (user && navActions) {
         navActions.innerHTML = `
-          <span style="font-size: 0.9rem; color: var(--text-muted);">Signed in as <strong>${user.name}</strong></span>
+          <span style="font-size: 0.9rem; color: var(--text-muted);">Signed in as <strong>${escapeHtml(user.name)}</strong></span>
           <button onclick="goToMyDashboard()" class="btn btn-primary">Go to Dashboard →</button>
         `;
       }
 
-      // 2. Fetch and render Recommended Vendors
+      // 2. Fetch and render the Best Evaluated / Recommended Vendor (Public Endpoint, No Login Required)
+      loadBestEvaluatedVendor();
+
+      // 3. Fetch and render general active vendor directory
+      loadActiveVendors();
+    });
+
+    /**
+     * Fetch best evaluated vendor dynamically from backend MongoDB
+     */
+    async function loadBestEvaluatedVendor() {
+      const container = document.getElementById('homepageRecommendationContainer');
+      try {
+        const res = await fetch('/api/vendors/recommend');
+        const data = await res.json();
+
+        if (res.ok && data.success && data.recommendedVendor) {
+          const v = data.recommendedVendor;
+          const overallScoreNum = parseFloat(v.overall_score || 0).toFixed(1);
+
+          container.innerHTML = `
+            <div class="recommendation-hero-card">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.25rem;">
+                <div>
+                  <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; color: var(--warning-text); margin-bottom: 0.35rem;">
+                    RECOMMENDED VENDOR
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                    <span class="rank-badge rank-1" style="font-size: 0.85rem; padding: 0.3rem 0.75rem;">⭐ BEST EVALUATED VENDOR</span>
+                    <span class="request-id-tag">${escapeHtml(v.vendor_id)}</span>
+                  </div>
+                  <h2 style="font-size: 1.95rem; margin: 0.35rem 0 0.25rem 0; color: var(--text-main); font-weight: 800;">
+                    Vendor Name: ${escapeHtml(v.vendor_name)}
+                  </h2>
+                  <div style="font-size: 0.9rem; color: var(--text-muted);">
+                    Vendor ID: <strong>${escapeHtml(v.vendor_id)}</strong> | 
+                    Category: <strong>${escapeHtml(v.product_categories)}</strong> | 
+                    Location: <strong>${escapeHtml(v.city || 'National')}${v.state ? ', ' + escapeHtml(v.state) : ''}</strong>
+                  </div>
+                </div>
+
+                <!-- Overall Score Box -->
+                <div style="text-align: right; background: var(--primary-light); padding: 1.25rem 1.75rem; border-radius: var(--radius-md); border: 2px solid var(--border-color); min-width: 190px;">
+                  <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); letter-spacing: 0.5px;">
+                    Overall Score
+                  </div>
+                  <div style="font-size: 2.75rem; font-weight: 800; font-family: monospace; color: var(--primary); line-height: 1.1;">
+                    ${overallScoreNum}<span style="font-size: 1.25rem; color: var(--text-muted); font-weight: 600;">/100</span>
+                  </div>
+                  <div style="margin-top: 0.25rem;">
+                    <span class="rating-pill">⭐ ${v.rating} / 5.0 Rating</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Important Evaluation Factors -->
+              <div class="score-metric-grid" style="margin: 1.25rem 0;">
+                <div class="score-metric-box">
+                  <div class="score-metric-label">💰 Price Score</div>
+                  <div class="score-metric-value">${v.price_score}<span style="font-size: 0.85rem; color: var(--text-muted);">/100</span></div>
+                  <span class="score-weight-tag">Weight: 40%</span>
+                </div>
+                <div class="score-metric-box">
+                  <div class="score-metric-label">⭐ Quality Score</div>
+                  <div class="score-metric-value">${v.quality_score}<span style="font-size: 0.85rem; color: var(--text-muted);">/100</span></div>
+                  <span class="score-weight-tag">Weight: 35%</span>
+                </div>
+                <div class="score-metric-box">
+                  <div class="score-metric-label">🚚 Delivery Score</div>
+                  <div class="score-metric-value">${v.delivery_score}<span style="font-size: 0.85rem; color: var(--text-muted);">/100</span></div>
+                  <span class="score-weight-tag">Weight: 25%</span>
+                </div>
+                ${v.quotation ? `
+                  <div class="score-metric-box" style="background: #EBF3ED; border-color: #D1E4D6;">
+                    <div class="score-metric-label" style="color: #275A36;">Quotation Rate</div>
+                    <div class="score-metric-value" style="color: #275A36;">$${parseFloat(v.quotation.unit_price).toFixed(2)}</div>
+                    <span class="score-weight-tag" style="color: #275A36;">Lead: ${escapeHtml(v.quotation.delivery_time)}</span>
+                  </div>
+                ` : ''}
+              </div>
+
+              <!-- Rationale Summary -->
+              <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.95rem 1.25rem; margin-top: 1rem; font-size: 0.875rem; color: var(--text-body);">
+                💡 <strong>Evaluation Rationale:</strong> ${escapeHtml(v.recommendation_reason)}
+              </div>
+
+              <!-- Mandatory Homepage Buttons -->
+              <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1.5rem; flex-wrap: wrap;">
+                <button onclick="showVendorDetailsModal('${escapeHtml(v.vendor_name)}', '${escapeHtml(v.vendor_id)}', '${overallScoreNum}', '${v.price_score}', '${v.quality_score}', '${v.delivery_score}', '${escapeHtml(v.product_categories)}', '${escapeHtml(v.city || '')}', '${escapeHtml(v.description || '')}')" class="btn btn-secondary btn-lg">
+                  View Details
+                </button>
+                <a href="login.html" class="btn btn-primary btn-lg" style="background: var(--primary); color: #FFFFFF !important;">
+                  Login / Register →
+                </a>
+              </div>
+            </div>
+          `;
+        } else {
+          // Standard empty state when no vendors have been evaluated yet
+          container.innerHTML = `
+            <div style="text-align: center; padding: 3rem 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg);">
+              <div style="font-size: 2.75rem; margin-bottom: 0.75rem;">⚖️</div>
+              <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--text-main);">No evaluated vendors available yet.</h3>
+              <p style="font-size: 0.9rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 1.5rem;">
+                Vendors will be dynamically recommended here once multi-criteria performance evaluations are recorded.
+              </p>
+              <div style="display: flex; gap: 0.75rem; justify-content: center;">
+                <a href="login.html" class="btn btn-primary">Login to Evaluate Vendors →</a>
+                <a href="register.html" class="btn btn-secondary">Register as Vendor</a>
+              </div>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error('Error fetching best vendor recommendation:', err);
+        container.innerHTML = `
+          <div style="text-align: center; padding: 2rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); color: var(--text-muted);">
+            Unable to load vendor recommendation at this time.
+          </div>
+        `;
+      }
+    }
+
+    /**
+     * Load general active vendor directory
+     */
+    async function loadActiveVendors() {
       const container = document.getElementById('vendorShowcaseContainer');
       try {
         const res = await fetch('/api/vendors/public');
@@ -141,7 +311,7 @@
             <div class="vendor-showcase-card">
               <div class="vendor-card-header">
                 <div>
-                  <span class="request-id-tag">${v.vendor_id || 'VEN'}</span>
+                  <span class="request-id-tag">${escapeHtml(v.vendor_id || 'VEN')}</span>
                   <span class="badge badge-approved" style="margin-left: 0.35rem; font-size: 0.7rem;">Verified</span>
                 </div>
                 <div class="rating-pill">
@@ -159,7 +329,7 @@
 
               <div style="margin-bottom: 0.85rem;">
                 <span style="display: inline-block; font-size: 0.75rem; background: var(--primary-light); color: var(--primary); padding: 0.2rem 0.55rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-weight: 600;">
-                  📦 ${escapeHtml(v.category || 'Computer Accessories')}
+                  📦 ${escapeHtml(v.category || v.product_categories || 'Computer Accessories')}
                 </span>
               </div>
 
@@ -169,7 +339,7 @@
 
               <div style="border-top: 1px solid var(--border-color); padding-top: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 0.775rem; color: var(--text-muted); font-weight: 500;">
-                  🏆 ${escapeHtml(v.badge || 'Top Rated Supplier')}
+                  🏆 ${escapeHtml(v.badge || 'Verified Partner')}
                 </span>
                 <a href="login.html" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">
                   Request Quote →
@@ -180,19 +350,62 @@
         } else {
           container.innerHTML = `
             <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted);">
-              No recommended vendors currently active.
+              No active vendors found in directory.
             </div>
           `;
         }
       } catch (err) {
-        console.error('Error fetching public vendors:', err);
-        container.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted);">
-            Unable to load vendor directory at this time.
+        console.error('Error fetching vendors:', err);
+      }
+    }
+
+    /**
+     * Show Vendor Details Modal
+     */
+    function showVendorDetailsModal(name, id, overall, price, quality, delivery, category, city, desc) {
+      const modal = document.getElementById('vendorDetailsModal');
+      const nameEl = document.getElementById('modalVendorName');
+      const idEl = document.getElementById('modalVendorId');
+      const bodyEl = document.getElementById('modalDetailsBody');
+
+      if (modal && nameEl && idEl && bodyEl) {
+        nameEl.textContent = name;
+        idEl.textContent = id;
+        bodyEl.innerHTML = `
+          <div style="background: var(--primary-subtle); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <span style="font-weight: 700;">Overall Evaluation Score</span>
+              <span class="overall-score-pill top" style="font-size: 1.15rem;">${overall}/100</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; text-align: center; margin-top: 0.75rem;">
+              <div style="background: white; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border-color);">
+                <div style="font-size: 0.7rem; color: var(--text-muted);">Price (40%)</div>
+                <div style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">${price}/100</div>
+              </div>
+              <div style="background: white; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border-color);">
+                <div style="font-size: 0.7rem; color: var(--text-muted);">Quality (35%)</div>
+                <div style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">${quality}/100</div>
+              </div>
+              <div style="background: white; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border-color);">
+                <div style="font-size: 0.7rem; color: var(--text-muted);">Delivery (25%)</div>
+                <div style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">${delivery}/100</div>
+              </div>
+            </div>
+          </div>
+          <div style="font-size: 0.85rem; line-height: 1.6;">
+            <div><strong>Product Category:</strong> ${category}</div>
+            <div><strong>Operating Location:</strong> ${city || 'National Delivery'}</div>
+            <div style="margin-top: 0.5rem; color: var(--text-muted);">${desc || 'Certified enterprise hardware and computer accessories supplier.'}</div>
           </div>
         `;
+        modal.classList.add('active');
       }
-    });
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) modal.classList.remove('active');
+    }
 
     function escapeHtml(str) {
       if (!str) return '';

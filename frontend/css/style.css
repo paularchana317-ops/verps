@@ -849,3 +849,138 @@ select.form-control {
     font-size: 0.85rem;
   }
 }
+
+/* ==========================================================
+   Sprint 3: Evaluation, Comparison & Recommendation Styles
+   ========================================================== */
+
+/* Score Metric Displays */
+.score-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.85rem;
+  margin: 1.25rem 0;
+}
+
+.score-metric-box {
+  background: var(--primary-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.85rem;
+  text-align: center;
+}
+
+.score-metric-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.score-metric-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  font-family: monospace;
+}
+
+.score-weight-tag {
+  font-size: 0.7rem;
+  color: var(--text-light);
+  display: block;
+  margin-top: 0.15rem;
+}
+
+/* Overall Score Highlights */
+.overall-score-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 800;
+  font-size: 1.1rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid var(--primary-border);
+}
+
+.overall-score-pill.top {
+  background: var(--warning-light);
+  color: var(--warning-text);
+  border-color: var(--warning-subtle);
+}
+
+/* Rank Badges */
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-weight: 800;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rank-badge.rank-1 {
+  background: #FEF3C7;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+}
+
+.rank-badge.rank-2 {
+  background: #E0E7FF;
+  color: #3730A3;
+  border: 1px solid #C7D2FE;
+}
+
+.rank-badge.rank-3 {
+  background: #F3F4F6;
+  color: #374151;
+  border: 1px solid #E5E7EB;
+}
+
+/* Recommendation Hero Card */
+.recommendation-hero-card {
+  background: linear-gradient(145deg, #FFFFFF 0%, #FAF8F4 100%);
+  border: 2px solid var(--primary);
+  border-radius: var(--radius-lg);
+  padding: 2.25rem;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.recommendation-hero-card::before {
+  content: "⭐ TOP RECOMMENDATION";
+  position: absolute;
+  top: 1rem;
+  right: -2rem;
+  background: var(--primary);
+  color: #FFFFFF;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 0.35rem 2.5rem;
+  transform: rotate(45deg);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.live-score-preview {
+  background: var(--primary-light);
+  border: 1px dashed var(--primary);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+

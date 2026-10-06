@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const vendorController = require('../controllers/vendorController');
+const evaluationController = require('../controllers/evaluationController');
 const authController = require('../controllers/authController');
 const authenticateToken = require('../middleware/authMiddleware');
 const authorizeRole = require('../middleware/roleMiddleware');
@@ -11,9 +12,20 @@ router.post('/register', (req, res, next) => {
   authController.register(req, res, next);
 });
 
-// Public Recommended Vendors endpoint (for Public Home Page before Login)
+// Public / Authenticated Sprint 3 Vendor Recommendation (SCRUM-28 & Home Page)
+router.get('/recommend', evaluationController.getRecommendedVendor);
+
+// Sprint 3 Vendor Comparison (SCRUM-27)
+router.get(
+  '/compare', 
+  authenticateToken, 
+  authorizeRole(['Admin', 'User/Requester']), 
+  evaluationController.compareVendors
+);
+
+// Backward-compatible Public Recommended Vendors endpoints
 router.get('/public', vendorController.getPublicRecommendedVendors);
-router.get('/recommended', vendorController.getPublicRecommendedVendors);
+router.get('/recommended', evaluationController.getRecommendedVendor);
 
 // All other vendor management routes are restricted to Admin role only
 router.post(

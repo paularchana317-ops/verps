@@ -18,6 +18,10 @@
         </div>
       </a>
       <div class="nav-links">
+        <a href="vendor-management.html" class="btn btn-secondary">Vendors</a>
+        <a href="vendor-evaluation.html" class="btn btn-secondary">Evaluate</a>
+        <a href="compare-vendors.html" class="btn btn-secondary">Compare</a>
+        <a href="vendor-recommendation.html" class="btn btn-primary" style="background: var(--primary); color: #FFFFFF !important;">⭐ Recommendations</a>
         <div class="nav-user">
           <div class="user-info">
             <span id="navUserName" class="user-name">Admin</span>
@@ -72,25 +76,44 @@
         </a>
       </div>
 
-      <!-- 3. User Management (Placeholder) -->
+      <!-- 3. Vendor Evaluation (Sprint 3: SCRUM-26) -->
+      <div class="dashboard-card highlight">
+        <div class="card-icon">⚖️</div>
+        <h3>Vendor Evaluation</h3>
+        <p>Evaluate vendor quotation submissions on Price (40%), Quality (35%), and Delivery (25%) with automatic composite scoring.</p>
+        <a href="vendor-evaluation.html" class="btn btn-primary btn-block">
+          Evaluate Vendors →
+        </a>
+      </div>
+
+      <!-- 4. Compare Vendors (Sprint 3: SCRUM-27) -->
+      <div class="dashboard-card highlight">
+        <div class="card-icon">📊</div>
+        <h3>Compare Vendors</h3>
+        <p>Benchmark vendors side-by-side using quotation metrics, individual criteria scores, and composite rankings.</p>
+        <a href="compare-vendors.html" class="btn btn-primary btn-block">
+          Compare Matrix →
+        </a>
+      </div>
+
+      <!-- 5. Vendor Recommendations (Sprint 3: SCRUM-28) -->
+      <div class="dashboard-card highlight">
+        <div class="card-icon">🏆</div>
+        <h3>Vendor Recommendations</h3>
+        <p>View the highest-ranked vendor recommendation and ranked alternatives generated from MongoDB evaluations.</p>
+        <a href="vendor-recommendation.html" class="btn btn-primary btn-block">
+          View Recommendations →
+        </a>
+      </div>
+
+      <!-- 6. User Management (Placeholder) -->
       <div class="dashboard-card">
-        <span class="placeholder-tag">Upcoming</span>
+        <span class="placeholder-tag">Governance</span>
         <div class="card-icon placeholder-icon">👥</div>
         <h3>User Management</h3>
         <p>Manage system users, approve account roles, configure access privileges, and monitor login activity.</p>
         <button onclick="showPlaceholderNotice('User Management')" class="btn btn-secondary btn-block">
           Open Management
-        </button>
-      </div>
-
-      <!-- 4. Vendor Evaluation (Placeholder) -->
-      <div class="dashboard-card">
-        <span class="placeholder-tag">Upcoming</span>
-        <div class="card-icon placeholder-icon">⚖️</div>
-        <h3>Vendor Evaluation</h3>
-        <p>Run multi-criteria decision models (AHP/TOPSIS) to rank vendor quotation submissions and evaluate reliability.</p>
-        <button onclick="showPlaceholderNotice('Vendor Evaluation & Recommendation Engine')" class="btn btn-secondary btn-block">
-          Run Evaluation
         </button>
       </div>
     </div>

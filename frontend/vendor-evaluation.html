@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Evaluation - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="admin-dashboard.html" class="brand-logo">
+        <div class="logo-badge">V</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Evaluation & Ranking</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="admin-dashboard.html" class="btn btn-secondary">Dashboard</a>
+        <a href="vendor-management.html" class="btn btn-secondary">Vendors</a>
+        <a href="compare-vendors.html" class="btn btn-secondary">Compare</a>
+        <a href="vendor-recommendation.html" class="btn btn-primary" style="background: var(--primary); color: #FFFFFF !important;">⭐ Recommendations</a>
+        <div class="nav-user">
+          <div class="user-info">
+            <span id="navUserName" class="user-name">Evaluator</span>
+            <span id="navUserRole" class="user-role-badge admin">Admin</span>
+          </div>
+          <button onclick="logout()" class="btn btn-outline-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Breadcrumb / Header Summary -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <span class="placeholder-tag" style="background: var(--primary-light); color: var(--primary); border-color: var(--border-color); margin-bottom: 0.5rem;">
+          SCRUM-26: Multi-Factor Evaluation Model
+        </span>
+        <h1 style="font-size: 1.85rem; margin-top: 0.35rem;">Vendor Evaluation</h1>
+        <p>Assess supplier performance based on price competitiveness, product quality, and delivery fulfillment.</p>
+      </div>
+      <div style="display: flex; gap: 0.75rem;">
+        <a href="compare-vendors.html" class="btn btn-secondary">
+          ⚖️ Compare Vendors
+        </a>
+        <a href="vendor-recommendation.html" class="btn btn-primary">
+          🏆 View Recommendations →
+        </a>
+      </div>
+    </div>
+
+    <!-- Alert Banner -->
+    <div id="formAlert" class="alert" style="display: none;"></div>
+
+    <!-- Evaluation Form Card -->
+    <div class="content-card" style="margin-bottom: 2.5rem;">
+      <div class="content-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.35rem;">Evaluate Vendor Performance</h2>
+        <p>Scores are calculated using the weighted formula: <strong>Overall Score = (Price × 40%) + (Quality × 35%) + (Delivery × 25%)</strong></p>
+      </div>
+
+      <form id="vendorEvaluationForm" novalidate>
+        <!-- Vendor Selection -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="vendorSelect">Select Vendor to Evaluate <span class="required-star">*</span></label>
+            <select id="vendorSelect" class="form-control" required style="font-weight: 600;">
+              <option value="">-- Choose a vendor to evaluate --</option>
+            </select>
+            <span class="form-hint">Vendors registered and active in the VEPRS supplier directory.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="quotationRef">Linked Quotation (Optional)</label>
+            <select id="quotationRef" class="form-control">
+              <option value="">-- General Evaluation (No specific quote) --</option>
+            </select>
+            <span class="form-hint">Optionally link this evaluation to a specific tender quote.</span>
+          </div>
+        </div>
+
+        <!-- Selected Vendor Details Preview Card -->
+        <div id="selectedVendorInfoCard" style="display: none; background: var(--primary-subtle); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap;">
+            <strong id="infoVendorName" style="font-size: 1.1rem; color: var(--text-main);">ABC Technologies</strong>
+            <span id="infoVendorId" class="request-id-tag">VEN-1001</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; font-size: 0.85rem; color: var(--text-muted);">
+            <div><strong>Contact:</strong> <span id="infoContact">—</span></div>
+            <div><strong>Category:</strong> <span id="infoCategory">Computer Accessories</span></div>
+            <div><strong>Location:</strong> <span id="infoLocation">—</span></div>
+          </div>
+        </div>
+
+        <!-- Scoring Factors Grid (Price, Quality, Delivery) -->
+        <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem;">Evaluation Criteria Scores (0 - 100)</h3>
+
+        <div class="form-row">
+          <!-- Price Score -->
+          <div class="form-group">
+            <label for="priceScore">
+              💰 Price Score <span class="required-star">*</span>
+              <span class="score-weight-tag">(Weight: 40%)</span>
+            </label>
+            <input 
+              type="number" 
+              id="priceScore" 
+              class="form-control" 
+              min="0" 
+              max="100" 
+              step="1" 
+              placeholder="e.g. 90" 
+              required
+            >
+            <span class="form-hint">Score based on price competitiveness and market quotation value.</span>
+          </div>
+
+          <!-- Quality Score -->
+          <div class="form-group">
+            <label for="qualityScore">
+              ⭐ Quality Score <span class="required-star">*</span>
+              <span class="score-weight-tag">(Weight: 35%)</span>
+            </label>
+            <input 
+              type="number" 
+              id="qualityScore" 
+              class="form-control" 
+              min="0" 
+              max="100" 
+              step="1" 
+              placeholder="e.g. 95" 
+              required
+            >
+            <span class="form-hint">Score based on hardware build quality, warranty, and compliance.</span>
+          </div>
+
+          <!-- Delivery Score -->
+          <div class="form-group">
+            <label for="deliveryScore">
+              🚚 Delivery Score <span class="required-star">*</span>
+              <span class="score-weight-tag">(Weight: 25%)</span>
+            </label>
+            <input 
+              type="number" 
+              id="deliveryScore" 
+              class="form-control" 
+              min="0" 
+              max="100" 
+              step="1" 
+              placeholder="e.g. 91" 
+              required
+            >
+            <span class="form-hint">Score based on lead times, delivery fulfillment, and logistics track record.</span>
+          </div>
+        </div>
+
+        <!-- Live Score Calculation Preview -->
+        <div class="live-score-preview">
+          <div>
+            <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; color: var(--text-muted);">
+              Calculated Overall Score (Live Preview)
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-top: 0.25rem;">
+              <span id="previewOverallScore" style="font-size: 2.25rem; font-weight: 800; font-family: monospace; color: var(--primary);">0.0</span>
+              <span style="font-size: 1.1rem; color: var(--text-muted); font-weight: 600;">/ 100</span>
+              <span id="previewRating" class="badge" style="background: var(--warning-light); color: var(--warning-text); border: 1px solid var(--warning-subtle); margin-left: 0.5rem;">
+                0.0 / 5.0
+              </span>
+            </div>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-align: right;">
+            <div>Price (40%): <strong id="previewPriceContrib" style="color: var(--primary);">0.0</strong></div>
+            <div>Quality (35%): <strong id="previewQualityContrib" style="color: var(--primary);">0.0</strong></div>
+            <div>Delivery (25%): <strong id="previewDeliveryContrib" style="color: var(--primary);">0.0</strong></div>
+          </div>
+        </div>
+
+        <!-- Feedback & Notes -->
+        <div class="form-group">
+          <label for="feedback">Evaluation Feedback & Assessment Remarks</label>
+          <textarea 
+            id="feedback" 
+            class="form-control" 
+            rows="3" 
+            placeholder="e.g. Consistent on-time fulfillment with premium OEM packaging and competitive unit rates."
+          ></textarea>
+        </div>
+
+        <!-- Form Actions -->
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="reset" class="btn btn-secondary" onclick="setTimeout(updateScorePreview, 50)">Reset</button>
+          <button type="submit" id="submitEvalBtn" class="btn btn-primary btn-lg">
+            💾 Save Evaluation
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Evaluations History Table -->
+    <div class="table-container">
+      <div class="table-header-bar">
+        <div style="font-weight: 700; font-size: 1.05rem; color: var(--text-main);">
+          Existing Vendor Evaluations History
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <input 
+            type="text" 
+            id="evaluationSearchInput" 
+            class="form-control" 
+            placeholder="Search by vendor, ID, evaluator..." 
+            style="width: 280px; padding: 0.45rem 0.75rem; font-size: 0.875rem;"
+            onkeyup="filterEvaluationsTable()"
+          >
+          <button onclick="loadEvaluationsTable()" class="btn btn-secondary" title="Refresh List" style="padding: 0.45rem 0.85rem;">
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="tableLoading" style="text-align: center; padding: 3rem 1rem; color: var(--text-muted); display: none;">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">⏳</div>
+        <div>Loading vendor evaluations from database...</div>
+      </div>
+
+      <!-- Table -->
+      <div style="overflow-x: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Evaluation ID</th>
+              <th>Vendor</th>
+              <th>Price Score</th>
+              <th>Quality Score</th>
+              <th>Delivery Score</th>
+              <th>Overall Score</th>
+              <th>Evaluator</th>
+              <th>Feedback</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="evaluationsTableBody">
+            <!-- Dynamically populated by evaluations.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div id="tableEmpty" style="text-align: center; padding: 4rem 1.5rem; display: none;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">⚖️</div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">No evaluations recorded yet</h3>
+        <p style="max-width: 440px; margin: 0 auto 1.5rem;">
+          Select a vendor above to log their first performance evaluation.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Success Modal -->
+  <div id="evalSuccessModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-icon success">✓</div>
+      <h2 class="modal-title">Evaluation Saved!</h2>
+      <div class="modal-body">
+        The vendor evaluation has been recorded in the database and overall rankings have been dynamically updated.
+        <div class="modal-code-box" id="modalEvalId">EVAL-1001</div>
+      </div>
+      <div class="modal-actions">
+        <a href="compare-vendors.html" class="btn btn-secondary">Compare Vendors</a>
+        <a href="vendor-recommendation.html" class="btn btn-primary">View Recommendation →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/evaluations.js"></script>
+  <script>
+    // Enforce Role Guard: Admin and User/Requester can evaluate
+    checkAuth(['Admin', 'User/Requester']);
+  </script>
+</body>
+</html>

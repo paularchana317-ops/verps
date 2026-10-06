@@ -1,4 +1,6 @@
 const { pool } = require('../config/db');
+const { isMongoConnected } = require('../config/mongodb');
+const Vendor = require('../models/Vendor');
 
 /**
  * Generate Next Unique Vendor ID (e.g. VEN-1001, VEN-1002, ...)
@@ -133,6 +135,28 @@ async function addVendor(req, res) {
         'Active'
       ]
     );
+
+    // Sync with MongoDB Atlas if connected
+    if (isMongoConnected()) {
+      try {
+        await Vendor.create({
+          vendor_id: vendorId,
+          vendor_name: vendorName.trim(),
+          contact_person: contactPerson.trim(),
+          email: trimmedEmail,
+          phone: phone.trim(),
+          address: address.trim(),
+          city: city ? city.trim() : '',
+          state: state ? state.trim() : '',
+          product_categories: categories,
+          business_registration_number: businessRegistrationNumber ? businessRegistrationNumber.trim() : null,
+          description: description ? description.trim() : null,
+          status: 'Active'
+        });
+      } catch (mErr) {
+        console.warn('[MongoDB Vendor Sync Warning]:', mErr.message);
+      }
+    }
 
     return res.status(201).json({
       success: true,
@@ -461,6 +485,31 @@ async function updateVendor(req, res) {
         numericId
       ]
     );
+
+    // Sync with MongoDB Atlas if connected
+    if (isMongoConnected()) {
+      try {
+        await Vendor.findOneAndUpdate(
+          { vendor_id: currentVendor.vendor_id },
+          {
+            vendor_name: vendorName.trim(),
+            contact_person: contactPerson.trim(),
+            email: trimmedEmail,
+            phone: phone.trim(),
+            address: address.trim(),
+            city: city ? city.trim() : '',
+            state: state ? state.trim() : '',
+            product_categories: categories,
+            business_registration_number: businessRegistrationNumber ? businessRegistrationNumber.trim() : null,
+            description: description ? description.trim() : null,
+            status: updatedStatus,
+            updatedAt: new Date()
+          }
+        );
+      } catch (mErr) {
+        console.warn('[MongoDB Vendor Update Warning]:', mErr.message);
+      }
+    }
 
     return res.status(200).json({
       success: true,

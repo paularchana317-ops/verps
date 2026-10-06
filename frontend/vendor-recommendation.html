@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Recommendation - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="admin-dashboard.html" class="brand-logo">
+        <div class="logo-badge">V</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Evaluation & Ranking</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="admin-dashboard.html" class="btn btn-secondary">Dashboard</a>
+        <a href="vendor-evaluation.html" class="btn btn-secondary">Evaluate</a>
+        <a href="compare-vendors.html" class="btn btn-secondary">Compare</a>
+        <a href="vendor-recommendation.html" class="btn btn-primary" style="background: var(--primary); color: #FFFFFF !important;">⭐ Recommendations</a>
+        <div class="nav-user">
+          <div class="user-info">
+            <span id="navUserName" class="user-name">User</span>
+            <span id="navUserRole" class="user-role-badge admin">Admin</span>
+          </div>
+          <button onclick="logout()" class="btn btn-outline-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Header Summary -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <span class="placeholder-tag" style="background: var(--warning-light); color: var(--warning-text); border-color: var(--warning-subtle); margin-bottom: 0.5rem;">
+          SCRUM-28: Automated Decision Engine
+        </span>
+        <h1 style="font-size: 1.85rem; margin-top: 0.35rem;">Vendor Recommendation</h1>
+        <p>Dynamic decision system identifying the highest-ranked vendor using actual evaluation criteria weights and database metrics.</p>
+      </div>
+      <div style="display: flex; gap: 0.75rem;">
+        <a href="vendor-evaluation.html" class="btn btn-secondary">
+          ➕ Evaluate Vendor
+        </a>
+        <a href="compare-vendors.html" class="btn btn-secondary">
+          ⚖️ Compare All Vendors
+        </a>
+      </div>
+    </div>
+
+    <!-- Alert Banner -->
+    <div id="formAlert" class="alert" style="display: none;"></div>
+
+    <!-- Loading State -->
+    <div id="recommendationLoading" style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+      <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">⏳</div>
+      <div>Computing optimal vendor recommendation from database...</div>
+    </div>
+
+    <!-- Empty State (No evaluated vendors yet) -->
+    <div id="recommendationEmptyState" style="text-align: center; padding: 4.5rem 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); display: none;">
+      <div style="font-size: 3.5rem; margin-bottom: 1rem;">⚖️</div>
+      <h2 style="font-size: 1.45rem; margin-bottom: 0.5rem; color: var(--text-main);">No evaluated vendors available yet.</h2>
+      <p style="max-width: 480px; margin: 0 auto 1.75rem; color: var(--text-muted);">
+        No performance evaluations have been submitted yet. Evaluate vendors in the directory to generate real-time purchase recommendations.
+      </p>
+      <a href="vendor-evaluation.html" class="btn btn-primary btn-lg">
+        Evaluate a Vendor Now →
+      </a>
+    </div>
+
+    <!-- 1. Hero Container for Top Recommended Vendor -->
+    <div id="recommendationHeroContainer" style="display: none;">
+      <!-- Injected by recommendation.js -->
+    </div>
+
+    <!-- 2. Ranked Alternative Vendors Table -->
+    <div id="alternativesContainer" class="table-container" style="display: none; margin-top: 2rem;">
+      <div class="table-header-bar">
+        <div>
+          <div style="font-weight: 700; font-size: 1.05rem; color: var(--text-main);">
+            Ranked Vendor Alternatives
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            Secondary options sorted by overall evaluation score and criteria performance.
+          </div>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Vendor Details</th>
+              <th>Price Score</th>
+              <th>Quality Score</th>
+              <th>Delivery Score</th>
+              <th>Overall Score</th>
+              <th>Rating</th>
+              <th>Assessment Summary</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="alternativesTableBody">
+            <!-- Dynamically injected by recommendation.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3. Scoring Methodology Card (Viva / Demo Ready) -->
+    <div style="margin-top: 3rem; background: var(--primary-subtle); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem;">
+      <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem;">
+        <span style="font-size: 1.25rem;">📐</span>
+        <h3 style="font-size: 1.15rem; margin: 0; color: var(--text-main);">Recommendation Algorithm & Scoring Methodology</h3>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+        VEPRS employs a multi-criteria decision model. Individual criteria scores (0–100) are synthesized into a normalized overall composite score using weighted linear aggregation:
+      </p>
+
+      <div style="background: var(--bg-card); border: 1px dashed var(--border-focus); border-radius: var(--radius-md); padding: 1rem 1.5rem; font-family: monospace; font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin-bottom: 1rem;">
+        Overall Score = (Price Score × 0.40) + (Quality Score × 0.35) + (Delivery Score × 0.25)
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; font-size: 0.85rem; color: var(--text-body);">
+        <div style="background: var(--bg-card); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <strong>💰 Price Criterion (40%)</strong><br>
+          <span style="color: var(--text-muted);">Evaluates quotation unit price, cost efficiency, and discount terms.</span>
+        </div>
+        <div style="background: var(--bg-card); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <strong>⭐ Quality Criterion (35%)</strong><br>
+          <span style="color: var(--text-muted);">Assesses product specifications, warranty coverage, and hardware durability.</span>
+        </div>
+        <div style="background: var(--bg-card); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <strong>🚚 Delivery Criterion (25%)</strong><br>
+          <span style="color: var(--text-muted);">Measures delivery turnaround lead times, logistics tracking, and fulfillment reliability.</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/recommendation.js"></script>
+  <script>
+    // Role Guard: Accessible by Admin and User/Requester
+    checkAuth(['Admin', 'User/Requester']);
+  </script>
+</body>
+</html>

@@ -121,6 +121,59 @@ CREATE TABLE IF NOT EXISTS quotations (
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ----------------------------------------------------------
+-- Table: evaluations (Sprint 3 - SCRUM-26)
+-- ----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS evaluations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    evaluation_id VARCHAR(50) NOT NULL UNIQUE,
+    vendor_id INT NOT NULL,
+    vendor_code VARCHAR(50) NOT NULL,
+    vendor_name VARCHAR(150) NOT NULL,
+    quotation_id VARCHAR(50) NULL,
+    evaluator_id VARCHAR(50) NOT NULL,
+    evaluator_name VARCHAR(100) NOT NULL,
+    price_score DECIMAL(5,2) NOT NULL,
+    quality_score DECIMAL(5,2) NOT NULL,
+    delivery_score DECIMAL(5,2) NOT NULL,
+    overall_score DECIMAL(5,2) NOT NULL,
+    feedback TEXT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'Completed',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_evaluations_vendor_id 
+        FOREIGN KEY (vendor_id) REFERENCES vendors(id) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------------------------------------
+-- Table: recommendations (Sprint 3 - SCRUM-28)
+-- ----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS recommendations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    recommendation_id VARCHAR(50) NOT NULL UNIQUE,
+    vendor_id INT NOT NULL,
+    vendor_code VARCHAR(50) NOT NULL,
+    vendor_name VARCHAR(150) NOT NULL,
+    overall_score DECIMAL(5,2) NOT NULL,
+    price_score DECIMAL(5,2) NOT NULL,
+    quality_score DECIMAL(5,2) NOT NULL,
+    delivery_score DECIMAL(5,2) NOT NULL,
+    rank INT NOT NULL DEFAULT 1,
+    product_categories VARCHAR(150) DEFAULT 'Computer Accessories',
+    city VARCHAR(100) NULL,
+    state VARCHAR(100) NULL,
+    summary TEXT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'Active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_recommendations_vendor_id 
+        FOREIGN KEY (vendor_id) REFERENCES vendors(id) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Indexes for high performance
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_purchase_requests_user_id ON purchase_requests(user_id);
@@ -134,3 +187,7 @@ CREATE INDEX idx_quotation_requests_pr_id ON quotation_requests(purchase_request
 CREATE INDEX idx_quotations_vendor_id ON quotations(vendor_id);
 CREATE INDEX idx_quotations_pr_id ON quotations(purchase_request_id);
 CREATE INDEX idx_quotations_qr_id ON quotations(quotation_request_id);
+CREATE INDEX idx_evaluations_vendor_id ON evaluations(vendor_id);
+CREATE INDEX idx_evaluations_overall_score ON evaluations(overall_score);
+CREATE INDEX idx_recommendations_vendor_id ON recommendations(vendor_id);
+CREATE INDEX idx_recommendations_rank ON recommendations(rank);
