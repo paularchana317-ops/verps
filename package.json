@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node backend/server.js",
     "build": "npm rebuild sqlite3 --build-from-source",
-    "dev": "nodemon backend/server.js"
+    "dev": "nodemon backend/server.js",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "keywords": [
     "veprs",
@@ -32,6 +34,8 @@
     "sqlite3": "5.1.7"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "jest": "^30.5.2",
+    "nodemon": "^3.1.9",
+    "supertest": "^7.3.1"
   }
 }

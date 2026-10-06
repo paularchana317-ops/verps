@@ -364,6 +364,7 @@ async function getQuotationById(req, res) {
 }
 
 module.exports = {
+  generateQuotationId,
   submitQuotation,
   getAllQuotations,
   getQuotationById
