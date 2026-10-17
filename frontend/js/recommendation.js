@@ -118,14 +118,17 @@ async function loadRecommendation() {
 
             <!-- Action Controls -->
             <div style="display: flex; gap: 1rem; margin-top: 1.75rem; flex-wrap: wrap;">
+              <a href="create-order.html?vendorId=${encodeURIComponent(best.vendor_numeric_id)}&vendorName=${encodeURIComponent(best.vendor_name)}" class="btn btn-primary" style="background: #1F4E3D; color: #FFFFFF !important; font-weight: 700;">
+                🛒 Create Purchase Order →
+              </a>
               <a href="compare-vendors.html" class="btn btn-secondary">
                 ⚖️ Compare with Other Vendors
               </a>
               <a href="vendor-evaluation.html?vendorId=${encodeURIComponent(best.vendor_numeric_id)}" class="btn btn-secondary">
                 ✏️ Update Evaluation
               </a>
-              <a href="purchase-requests.html" class="btn btn-primary" style="background: var(--primary); color: #FFFFFF !important;">
-                📑 View Purchase Requests →
+              <a href="purchase-requests.html" class="btn btn-secondary">
+                📑 View Purchase Requests
               </a>
             </div>
           </div>
@@ -159,9 +162,14 @@ async function loadRecommendation() {
               ${escapeHtml(alt.recommendation_reason)}
             </td>
             <td>
-              <a href="vendor-evaluation.html?vendorId=${encodeURIComponent(alt.vendor_numeric_id)}" class="btn btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.8rem;">
-                ✏️ Re-evaluate
-              </a>
+              <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+                <a href="create-order.html?vendorId=${encodeURIComponent(alt.vendor_numeric_id)}&vendorName=${encodeURIComponent(alt.vendor_name)}" class="btn btn-primary" style="padding: 0.35rem 0.65rem; font-size: 0.8rem; background: #1F4E3D; color: #FFFFFF !important;">
+                  🛒 Order
+                </a>
+                <a href="vendor-evaluation.html?vendorId=${encodeURIComponent(alt.vendor_numeric_id)}" class="btn btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.8rem;">
+                  ✏️ Re-evaluate
+                </a>
+              </div>
             </td>
           </tr>
         `).join('');

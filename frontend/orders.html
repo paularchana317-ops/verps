@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Tracking & Management - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Order Tracking Visual Progress Indicator */
+    .order-tracker-bar {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin: 1.5rem 0 2rem;
+      padding: 0 1rem;
+    }
+    .order-tracker-bar::before {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: 2rem;
+      right: 2rem;
+      height: 4px;
+      background: var(--border-color);
+      z-index: 1;
+    }
+    .tracker-progress-line {
+      position: absolute;
+      top: 18px;
+      left: 2rem;
+      height: 4px;
+      background: var(--primary);
+      z-index: 2;
+      transition: width 0.3s ease;
+    }
+    .tracker-step {
+      position: relative;
+      z-index: 3;
+      text-align: center;
+      flex: 1;
+    }
+    .tracker-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 3px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.5rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+    .tracker-step.completed .tracker-circle {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #FFFFFF;
+    }
+    .tracker-step.active .tracker-circle {
+      background: #FFFFFF;
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light);
+    }
+    .tracker-step.cancelled .tracker-circle {
+      background: var(--danger-light);
+      border-color: var(--danger);
+      color: var(--danger-text);
+    }
+    .tracker-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .tracker-step.completed .tracker-label,
+    .tracker-step.active .tracker-label {
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    /* Badges for order statuses */
+    .badge-placed {
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid var(--border-color);
+    }
+    .badge-processing {
+      background: var(--warning-light);
+      color: var(--warning-text);
+      border: 1px solid var(--warning-subtle);
+    }
+    .badge-shipped {
+      background: var(--info-light);
+      color: var(--info-text);
+      border: 1px solid var(--info-subtle);
+    }
+    .badge-delivered {
+      background: var(--success-light);
+      color: var(--success-text);
+      border: 1px solid var(--success-subtle);
+    }
+    .badge-cancelled {
+      background: var(--danger-light);
+      color: var(--danger-text);
+      border: 1px solid var(--danger-subtle);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="user-dashboard.html" class="brand-logo" id="brandLogoLink">
+        <div class="logo-badge">V</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle" id="portalSubtitle">Order Tracking</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="user-dashboard.html" class="btn btn-secondary" id="dashboardNavLink">Dashboard</a>
+        <a href="vendor-recommendation.html" class="btn btn-secondary" id="recommendationsNavLink">Recommendations</a>
+        <div class="nav-user">
+          <div class="user-info">
+            <span id="navUserName" class="user-name">User</span>
+            <span id="navUserRole" class="user-role-badge user">User</span>
+          </div>
+          <button onclick="logout()" class="btn btn-outline-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Header Banner -->
+    <div class="dashboard-welcome" style="margin-bottom: 2rem;">
+      <div>
+        <h1 id="ordersHeaderTitle">Purchase Order Tracking</h1>
+        <p id="ordersHeaderSubtitle">Monitor purchase order statuses, fulfillment progression, vendor assignments, and delivery logistics.</p>
+        <span id="ordersCountBadge" class="dashboard-role-badge">0 Orders</span>
+      </div>
+      <div id="createOrderActionContainer">
+        <a href="create-order.html" class="btn btn-secondary btn-lg" style="background: #FFFFFF; color: #1F1F1F !important; font-weight: 700;">
+          ➕ Create Purchase Order
+        </a>
+      </div>
+    </div>
+
+    <!-- Alert Message Area -->
+    <div id="formAlert" class="alert" style="display: none;"></div>
+
+    <!-- Filter & Search Bar -->
+    <div class="table-container">
+      <div class="table-header-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; gap: 0.75rem; flex: 1; min-width: 260px; max-width: 500px;">
+          <input 
+            type="text" 
+            id="orderSearchInput" 
+            class="form-control" 
+            placeholder="Search by Order ID, Product, Vendor..." 
+            oninput="filterOrdersTable()"
+          >
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <label for="statusFilter" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0;">Status:</label>
+          <select id="statusFilter" class="form-control" style="width: auto; padding-right: 2rem;" onchange="filterOrdersTable()">
+            <option value="ALL">All Statuses</option>
+            <option value="Placed">Placed</option>
+            <option value="Processing">Processing</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+          <button onclick="loadOrders()" class="btn btn-secondary" title="Refresh Orders">
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="tableLoading" style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">⏳</div>
+        <div>Loading purchase orders from database...</div>
+      </div>
+
+      <!-- Empty State -->
+      <div id="tableEmpty" style="text-align: center; padding: 4rem 1.5rem; display: none;">
+        <div style="font-size: 3rem; margin-bottom: 0.75rem;">📦</div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--text-main);">No purchase orders found</h3>
+        <p style="color: var(--text-muted); max-width: 440px; margin: 0 auto 1.5rem;" id="emptyStateMessage">
+          You have not placed any purchase orders yet. Create an order from an approved purchase request or recommended vendor.
+        </p>
+        <div id="emptyStateAction">
+          <a href="create-order.html" class="btn btn-primary">
+            ➕ Create First Order Now
+          </a>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div style="overflow-x: auto;">
+        <table class="data-table" id="ordersTable" style="display: none;">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Vendor Details</th>
+              <th>Product / Description</th>
+              <th>Quantity</th>
+              <th>Unit Price</th>
+              <th>Total Amount</th>
+              <th>Order Date</th>
+              <th>Current Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <!-- Dynamically populated by orders.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal 1: Order Tracking & Detail View Modal -->
+  <div id="orderDetailModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 680px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+        <div>
+          <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted);">Purchase Order</div>
+          <h2 style="font-size: 1.35rem; margin-bottom: 0; color: var(--text-main);" id="modalOrderIdTitle">ORD-1001</h2>
+        </div>
+        <button onclick="closeModal('orderDetailModal')" class="btn btn-secondary" style="padding: 0.35rem 0.65rem;">✕</button>
+      </div>
+
+      <!-- Visual Timeline Tracker -->
+      <div id="modalTrackerContainer">
+        <!-- Rendered by orders.js -->
+      </div>
+
+      <!-- Order Details Grid -->
+      <div id="modalOrderDetailsBody" style="font-size: 0.9rem;">
+        <!-- Injected dynamically -->
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;" id="modalOrderActions">
+        <button onclick="closeModal('orderDetailModal')" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Update Order Status (SCRUM-44) -->
+  <div id="updateStatusModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 520px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+        <h2 style="font-size: 1.25rem; margin-bottom: 0; color: var(--text-main);">Update Order Status</h2>
+        <button onclick="closeModal('updateStatusModal')" class="btn btn-secondary" style="padding: 0.35rem 0.65rem;">✕</button>
+      </div>
+
+      <form id="updateStatusForm" onsubmit="handleStatusSubmit(event)">
+        <input type="hidden" id="statusOrderId" value="">
+
+        <div class="form-group">
+          <label>Target Order</label>
+          <div id="statusOrderLabel" style="font-family: monospace; font-weight: 700; font-size: 1.1rem; color: var(--primary);">ORD-1001</div>
+        </div>
+
+        <div class="form-group">
+          <label for="newStatusSelect">New Order Status <span class="required-star">*</span></label>
+          <select id="newStatusSelect" class="form-control" required>
+            <!-- Injected according to role permissions -->
+          </select>
+          <span class="form-hint" id="statusHelpText">Select the next progression state for this order.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="statusComment">Status Update Notes / Comments</label>
+          <input type="text" id="statusComment" class="form-control" placeholder="e.g. Dispatched via courier tracking #98213">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+          <button type="button" onclick="closeModal('updateStatusModal')" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="saveStatusBtn" class="btn btn-primary" style="background: var(--primary); color: #FFFFFF !important;">
+            Save Status
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Requester Order Cancellation Confirmation Modal -->
+  <div id="cancelOrderModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 480px; text-align: center;">
+      <div class="modal-icon error">⚠️</div>
+      <h2 class="modal-title">Cancel Purchase Order?</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.25rem;">
+        Are you sure you want to cancel order <strong id="cancelModalOrderId" style="font-family: monospace;">ORD-1001</strong>? This action cannot be reversed.
+      </p>
+      <input type="hidden" id="cancelOrderIdHidden" value="">
+      <div class="modal-actions" style="display: flex; gap: 0.75rem; justify-content: center;">
+        <button onclick="closeModal('cancelOrderModal')" class="btn btn-secondary">Keep Order</button>
+        <button onclick="confirmCancelOrder()" class="btn btn-outline-danger" style="background: #8C2A2A; color: #FFFFFF !important; border: none;">
+          Yes, Cancel Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/orders.js"></script>
+  <script>
+    // Enforce authentication across roles
+    checkAuth(['User/Requester', 'Vendor', 'Admin', 'User', 'Requester']);
+    document.addEventListener('DOMContentLoaded', () => {
+      initOrdersTrackingPage();
+    });
+  </script>
+</body>
+</html>

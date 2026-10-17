@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Purchase Order - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="user-dashboard.html" class="brand-logo">
+        <div class="logo-badge">V</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle">Order Management</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="user-dashboard.html" class="btn btn-secondary">Dashboard</a>
+        <a href="orders.html" class="btn btn-secondary">Track Orders</a>
+        <a href="vendor-recommendation.html" class="btn btn-secondary">⭐ Recommendations</a>
+        <div class="nav-user">
+          <div class="user-info">
+            <span id="navUserName" class="user-name">Requester</span>
+            <span id="navUserRole" class="user-role-badge user">User / Requester</span>
+          </div>
+          <button onclick="logout()" class="btn btn-outline-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <div class="content-card" style="max-width: 840px; margin: 0 auto;">
+      <div class="content-header">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h1>Create Purchase Order</h1>
+            <p>Issue an official purchase order using evaluated suppliers, approved quotations, or requisitions.</p>
+          </div>
+          <div>
+            <a href="orders.html" class="btn btn-secondary">
+              📦 View All Orders
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Error / Validation Alert -->
+      <div id="formAlert" class="alert" style="display: none;"></div>
+
+      <!-- Quick Source Info Banner (If pre-filled from recommendation or quote) -->
+      <div id="sourceContextBanner" style="display: none; background: var(--primary-light); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: var(--primary); font-size: 0.95rem;">
+          <span>⭐ Pre-filled from Recommended Vendor Workflow</span>
+        </div>
+        <div id="sourceContextDetails" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+          Details have been populated from the top recommended supplier. Review and submit to place the order.
+        </div>
+      </div>
+
+      <form id="createOrderForm" novalidate>
+        <!-- 1. Quick-Fill Source Selector (Optional) -->
+        <div class="form-group" id="sourceSelectorGroup" style="display: none;">
+          <label for="orderSourceSelect">Select Workflow Source (Approved Requisition / Quotation)</label>
+          <select id="orderSourceSelect" class="form-control" onchange="handleSourceSelection(this.value)">
+            <option value="">-- Choose source requisition or quotation to pre-fill --</option>
+          </select>
+          <span class="form-hint">Selecting a source quotation or request will automatically populate item and pricing details.</span>
+        </div>
+
+        <!-- Hidden linkage fields -->
+        <input type="hidden" id="purchaseRequestId" value="">
+        <input type="hidden" id="quotationId" value="">
+
+        <!-- 2. Vendor Selection -->
+        <div class="form-group">
+          <label for="vendorSelect">Select Certified Vendor <span class="required-star">*</span></label>
+          <select id="vendorSelect" class="form-control" required onchange="handleVendorChange(this.value)">
+            <option value="">-- Loading certified vendors... --</option>
+          </select>
+          <span class="form-hint">Choose the vendor receiving this purchase order.</span>
+        </div>
+
+        <!-- 3. Product Details -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="productName">Product Name / Item Description <span class="required-star">*</span></label>
+            <input type="text" id="productName" class="form-control" placeholder="e.g. Dell UltraSharp 27-inch 4K Monitor" required>
+          </div>
+
+          <div class="form-group">
+            <label for="productCategory">Product Category <span class="required-star">*</span></label>
+            <select id="productCategory" class="form-control" required>
+              <option value="Computer Accessories" selected>Computer Accessories</option>
+              <option value="Peripherals">Peripherals</option>
+              <option value="Networking Equipment">Networking Equipment</option>
+              <option value="Storage Devices">Storage Devices</option>
+              <option value="Displays & Monitors">Displays & Monitors</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 4. Quantity and Unit Price with Real-time Total Calculation -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="quantity">Quantity (Units) <span class="required-star">*</span></label>
+            <input type="number" id="quantity" class="form-control" min="1" step="1" placeholder="e.g. 10" required oninput="calculateTotal()">
+            <span class="form-hint">Minimum 1 unit required.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="unitPrice">Unit Price ($) <span class="required-star">*</span></label>
+            <input type="number" id="unitPrice" class="form-control" min="0.01" step="0.01" placeholder="e.g. 350.00" required oninput="calculateTotal()">
+            <span class="form-hint">Price per single unit in USD.</span>
+          </div>
+        </div>
+
+        <!-- Real-Time Computed Total Price Card -->
+        <div style="background: var(--bg-card); border: 2px dashed var(--primary-border); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; color: var(--text-muted);">
+              Calculated Total Amount
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.15rem;">
+              Based on formula: <code>Quantity × Unit Price</code>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div id="totalAmountDisplay" style="font-size: 2rem; font-weight: 800; font-family: monospace; color: var(--primary);">
+              $0.00
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Delivery Address & Contact Phone -->
+        <div class="form-group">
+          <label for="deliveryAddress">Delivery Destination / Address <span class="required-star">*</span></label>
+          <textarea id="deliveryAddress" class="form-control" rows="3" placeholder="Enter delivery department, office location, building, and street address..." required></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="contactPhone">Contact Phone Number</label>
+            <input type="tel" id="contactPhone" class="form-control" placeholder="e.g. +91 9876543210">
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Special Instructions / PO Notes</label>
+            <input type="text" id="notes" class="form-control" placeholder="e.g. Deliver between 9 AM and 4 PM to IT Depot">
+          </div>
+        </div>
+
+        <!-- Form Submit Actions -->
+        <div style="display: flex; gap: 1rem; margin-top: 2rem; justify-content: flex-end;">
+          <a href="orders.html" class="btn btn-secondary">
+            Cancel
+          </a>
+          <button type="submit" id="submitOrderBtn" class="btn btn-primary" style="background: var(--primary); color: #FFFFFF !important; font-weight: 700; padding: 0.85rem 2rem;">
+            🛒 Place Purchase Order
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Success Confirmation Modal -->
+  <div id="orderSuccessModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-icon success">✓</div>
+      <h2 class="modal-title">Purchase Order Placed!</h2>
+      <div class="modal-body">
+        <p>Your purchase order has been successfully generated and recorded in the system.</p>
+        <div class="modal-code-box" id="modalOrderId">ORD-1001</div>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          The assigned vendor can now review the purchase order and initiate fulfillment processing.
+        </p>
+      </div>
+      <div class="modal-actions" style="display: flex; gap: 0.75rem; justify-content: center;">
+        <a href="orders.html" class="btn btn-primary" style="background: var(--primary); color: #FFFFFF !important;">
+          📦 View & Track Order →
+        </a>
+        <a href="user-dashboard.html" class="btn btn-secondary">
+          Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/orders.js"></script>
+  <script>
+    // Enforce Role Guard: Requester or Admin allowed
+    checkAuth(['User/Requester', 'Admin', 'User', 'Requester']);
+    document.addEventListener('DOMContentLoaded', () => {
+      initCreateOrderPage();
+    });
+  </script>
+</body>
+</html>

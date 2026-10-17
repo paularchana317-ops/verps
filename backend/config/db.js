@@ -294,9 +294,40 @@ function initSQLite(db) {
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE
         );
+      `);
+
+      // 8. orders table (Sprint 4: SCRUM-29, SCRUM-30, SCRUM-44)
+      db.run(`
+        CREATE TABLE IF NOT EXISTS orders (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          order_id TEXT NOT NULL UNIQUE,
+          user_id INTEGER NOT NULL,
+          user_name TEXT NOT NULL,
+          user_email TEXT NOT NULL,
+          vendor_id INTEGER NOT NULL,
+          vendor_code TEXT NOT NULL,
+          vendor_name TEXT NOT NULL,
+          purchase_request_id INTEGER,
+          purchase_request_code TEXT,
+          quotation_id INTEGER,
+          quotation_code TEXT,
+          product_name TEXT NOT NULL,
+          product_category TEXT NOT NULL DEFAULT 'Computer Accessories',
+          quantity INTEGER NOT NULL,
+          unit_price REAL NOT NULL,
+          total_price REAL NOT NULL,
+          delivery_address TEXT NOT NULL,
+          contact_phone TEXT,
+          notes TEXT,
+          status TEXT NOT NULL DEFAULT 'Placed',
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+          FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE
+        );
       `, (err) => {
         if (err) return reject(err);
-        console.log('[DB] Local SQLite database verified with Sprint 1, Sprint 2 & Sprint 3 tables.');
+        console.log('[DB] Local SQLite database verified with Sprint 1, 2, 3 & 4 tables.');
         resolve();
       });
     });
@@ -513,9 +544,46 @@ async function initDB() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
+    // 8. orders table (Sprint 4: SCRUM-29, SCRUM-30, SCRUM-44)
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS orders (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        order_id VARCHAR(50) NOT NULL UNIQUE,
+        user_id INT NOT NULL,
+        user_name VARCHAR(100) NOT NULL,
+        user_email VARCHAR(150) NOT NULL,
+        vendor_id INT NOT NULL,
+        vendor_code VARCHAR(50) NOT NULL,
+        vendor_name VARCHAR(150) NOT NULL,
+        purchase_request_id INT NULL,
+        purchase_request_code VARCHAR(50) NULL,
+        quotation_id INT NULL,
+        quotation_code VARCHAR(50) NULL,
+        product_name VARCHAR(150) NOT NULL,
+        product_category VARCHAR(100) NOT NULL DEFAULT 'Computer Accessories',
+        quantity INT NOT NULL,
+        unit_price DECIMAL(10,2) NOT NULL,
+        total_price DECIMAL(10,2) NOT NULL,
+        delivery_address TEXT NOT NULL,
+        contact_phone VARCHAR(50) NULL,
+        notes TEXT NULL,
+        status VARCHAR(50) NOT NULL DEFAULT 'Placed',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        CONSTRAINT fk_orders_user_id
+          FOREIGN KEY (user_id) REFERENCES users(id)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE,
+        CONSTRAINT fk_orders_vendor_id
+          FOREIGN KEY (vendor_id) REFERENCES vendors(id)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
     conn.release();
     activeMode = 'mysql';
-    console.log('[DB] MySQL database & all Sprint 1, 2, 3 tables verified successfully.');
+    console.log('[DB] MySQL database & all Sprint 1, 2, 3 & 4 tables verified successfully.');
   } catch (err) {
     activeMode = 'sqlite';
     console.log('[DB Notice] MySQL server is offline or unreachable (' + err.message + ').');

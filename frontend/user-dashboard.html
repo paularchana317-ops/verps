@@ -19,6 +19,7 @@
       </a>
       <div class="nav-links">
         <a href="my-requests.html" class="btn btn-secondary">My Requests</a>
+        <a href="orders.html" class="btn btn-secondary">Orders</a>
         <a href="compare-vendors.html" class="btn btn-secondary">Compare</a>
         <a href="vendor-recommendation.html" class="btn btn-primary" style="background: var(--primary); color: #FFFFFF !important;">⭐ Recommendations</a>
         <div class="nav-user">
@@ -102,15 +103,19 @@
         </a>
       </div>
 
-      <!-- 6. Orders (Placeholder) -->
-      <div class="dashboard-card">
-        <span class="placeholder-tag">Upcoming</span>
-        <div class="card-icon placeholder-icon">🚚</div>
-        <h3>Orders</h3>
-        <p>Monitor active purchase orders, fulfillment timelines, and delivery logistics.</p>
-        <button onclick="showPlaceholderNotice('Orders')" class="btn btn-secondary btn-block">
-          Manage Orders
-        </button>
+      <!-- 6. Orders (Sprint 4: SCRUM-29, SCRUM-30, SCRUM-44) -->
+      <div class="dashboard-card highlight">
+        <div class="card-icon">🚚</div>
+        <h3>Order Management</h3>
+        <p>Create purchase orders from approved requests, track shipments, and monitor delivery timelines.</p>
+        <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+          <a href="orders.html" class="btn btn-primary" style="flex: 1; text-align: center;">
+            Track Orders →
+          </a>
+          <a href="create-order.html" class="btn btn-secondary" style="flex: 1; text-align: center;">
+            + New Order
+          </a>
+        </div>
       </div>
     </div>
   </main>

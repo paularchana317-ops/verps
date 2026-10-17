@@ -174,6 +174,43 @@ CREATE TABLE IF NOT EXISTS recommendations (
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ----------------------------------------------------------
+-- Table: orders (Sprint 4 - SCRUM-29, SCRUM-30, SCRUM-44)
+-- ----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id VARCHAR(50) NOT NULL UNIQUE,
+    user_id INT NOT NULL,
+    user_name VARCHAR(100) NOT NULL,
+    user_email VARCHAR(150) NOT NULL,
+    vendor_id INT NOT NULL,
+    vendor_code VARCHAR(50) NOT NULL,
+    vendor_name VARCHAR(150) NOT NULL,
+    purchase_request_id INT NULL,
+    purchase_request_code VARCHAR(50) NULL,
+    quotation_id INT NULL,
+    quotation_code VARCHAR(50) NULL,
+    product_name VARCHAR(150) NOT NULL,
+    product_category VARCHAR(100) NOT NULL DEFAULT 'Computer Accessories',
+    quantity INT NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
+    total_price DECIMAL(10,2) NOT NULL,
+    delivery_address TEXT NOT NULL,
+    contact_phone VARCHAR(50) NULL,
+    notes TEXT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'Placed',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_orders_user_id 
+        FOREIGN KEY (user_id) REFERENCES users(id) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_orders_vendor_id 
+        FOREIGN KEY (vendor_id) REFERENCES vendors(id) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Indexes for high performance
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_purchase_requests_user_id ON purchase_requests(user_id);
@@ -191,3 +228,7 @@ CREATE INDEX idx_evaluations_vendor_id ON evaluations(vendor_id);
 CREATE INDEX idx_evaluations_overall_score ON evaluations(overall_score);
 CREATE INDEX idx_recommendations_vendor_id ON recommendations(vendor_id);
 CREATE INDEX idx_recommendations_rank ON recommendations(rank);
+CREATE INDEX idx_orders_user_id ON orders(user_id);
+CREATE INDEX idx_orders_vendor_id ON orders(vendor_id);
+CREATE INDEX idx_orders_order_id ON orders(order_id);
+CREATE INDEX idx_orders_status ON orders(status);

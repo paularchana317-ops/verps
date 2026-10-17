@@ -4,7 +4,8 @@ module.exports = {
   collectCoverageFrom: [
     'backend/controllers/authController.js',
     'backend/controllers/vendorController.js',
-    'backend/controllers/quotationController.js'
+    'backend/controllers/quotationController.js',
+    'backend/controllers/orderController.js'
   ],
   coverageReporters: ['text', 'text-summary', 'lcov'],
   coverageThreshold: {
