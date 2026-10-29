@@ -322,7 +322,7 @@ async function getVendorFeedbackSummary(req, res) {
 
     // Look up vendor
     const [vRows] = await pool.query(
-      'SELECT id, vendor_id, vendor_name, email, rating FROM vendors WHERE id = ? OR vendor_id = ? LIMIT 1',
+      'SELECT id, vendor_id, vendor_name, email FROM vendors WHERE id = ? OR vendor_id = ? LIMIT 1',
       [vendorId, vendorId]
     );
 
@@ -376,7 +376,7 @@ async function getVendorFeedbackSummary(req, res) {
         id: vendor.id,
         vendorId: vendor.vendor_id,
         vendorName: vendor.vendor_name,
-        storedRating: vendor.rating
+        storedRating: averageRating
       },
       summary: {
         totalReviews,
@@ -451,7 +451,7 @@ async function getFeedbackSources(req, res) {
 
     // 1. Fetch active certified vendors
     const [vendors] = await pool.query(
-      `SELECT id, vendor_id, vendor_name, email, product_categories, rating 
+      `SELECT id, vendor_id, vendor_name, email, product_categories 
        FROM vendors 
        WHERE status = 'Active' 
        ORDER BY vendor_name ASC`

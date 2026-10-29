@@ -24,6 +24,11 @@ router.get(
   authenticateToken,
   feedbackController.getMyFeedback
 );
+router.get(
+  '/my-feedback',
+  authenticateToken,
+  feedbackController.getMyFeedback
+);
 
 // SCRUM-32: View feedback summary and breakdown for a specific vendor
 router.get(
