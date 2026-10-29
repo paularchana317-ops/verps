@@ -5,7 +5,8 @@ module.exports = {
     'backend/controllers/authController.js',
     'backend/controllers/vendorController.js',
     'backend/controllers/quotationController.js',
-    'backend/controllers/orderController.js'
+    'backend/controllers/orderController.js',
+    'backend/controllers/feedbackController.js'
   ],
   coverageReporters: ['text', 'text-summary', 'lcov'],
   coverageThreshold: {

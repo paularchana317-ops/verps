@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Feedback & Reviews - VEPRS</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Feedback Interactive Star Rating System */
+    .star-rating-widget {
+      display: inline-flex;
+      flex-direction: row-reverse;
+      gap: 0.35rem;
+      font-size: 2.2rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .star-rating-widget input {
+      display: none;
+    }
+    .star-rating-widget label {
+      color: #D8D4CC;
+      transition: color 0.15s ease, transform 0.15s ease;
+      cursor: pointer;
+    }
+    .star-rating-widget label:hover,
+    .star-rating-widget label:hover ~ label,
+    .star-rating-widget input:checked ~ label {
+      color: #E5A93C;
+      transform: scale(1.08);
+    }
+    .rating-label-display {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 0.25rem;
+    }
+
+    /* Tab Controls */
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+      margin-bottom: 1.5rem;
+    }
+    .tab-btn {
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .tab-btn:hover {
+      color: var(--primary);
+    }
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background: rgba(31, 78, 61, 0.05);
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    }
+
+    /* Rating Summary Hero */
+    .rating-summary-hero {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-bottom: 1.75rem;
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 2rem;
+      align-items: center;
+    }
+    @media (max-width: 768px) {
+      .rating-summary-hero {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+      }
+    }
+    .overall-score-box {
+      text-align: center;
+      border-right: 1px solid var(--border-color);
+      padding-right: 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .overall-score-box {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1rem;
+        padding-right: 0;
+      }
+    }
+    .overall-score-num {
+      font-size: 3.5rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1;
+      margin-bottom: 0.35rem;
+    }
+    .overall-stars {
+      color: #E5A93C;
+      font-size: 1.35rem;
+      margin-bottom: 0.35rem;
+    }
+    .overall-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Star Breakdown Bars */
+    .rating-breakdown-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .breakdown-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+    .breakdown-label {
+      width: 55px;
+      color: var(--text-body);
+      font-weight: 600;
+    }
+    .breakdown-bar-bg {
+      flex: 1;
+      height: 9px;
+      background: #E8E5DF;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+    .breakdown-bar-fill {
+      height: 100%;
+      background: #E5A93C;
+      border-radius: 6px;
+      transition: width 0.4s ease;
+    }
+    .breakdown-count {
+      width: 40px;
+      text-align: right;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    /* Feedback Cards */
+    .feedback-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .feedback-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border-color: #B5B0A6;
+    }
+    .feedback-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .feedback-stars {
+      color: #E5A93C;
+      font-size: 1.15rem;
+      letter-spacing: 2px;
+    }
+    .category-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      background: #EBF3ED;
+      color: #1F4E3D;
+      border: 1px solid #D1E4D6;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="user-dashboard.html" class="brand-logo" id="brandLogoLink">
+        <div class="logo-badge">V</div>
+        <div>
+          VEPRS
+          <span class="brand-subtitle" id="portalSubtitle">Feedback Management</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="user-dashboard.html" class="btn btn-secondary" id="dashboardNavLink">Dashboard</a>
+        <a href="orders.html" class="btn btn-secondary" id="ordersNavLink">Orders</a>
+        <a href="vendor-recommendation.html" class="btn btn-secondary" id="recommendationsNavLink">Recommendations</a>
+        <div class="nav-user">
+          <div class="user-info">
+            <span id="navUserName" class="user-name">User</span>
+            <span id="navUserRole" class="user-role-badge user">User</span>
+          </div>
+          <button onclick="logout()" class="btn btn-outline-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Header Welcome Banner -->
+    <div class="dashboard-welcome" style="margin-bottom: 1.75rem;">
+      <div>
+        <h1 id="feedbackHeaderTitle">Vendor Feedback & Ratings</h1>
+        <p id="feedbackHeaderSubtitle">Submit ratings for certified vendors, share purchasing experiences, and review community satisfaction scores.</p>
+        <span id="feedbackCountBadge" class="dashboard-role-badge">Feedback System Active</span>
+      </div>
+      <div>
+        <button onclick="switchTab('submitTab')" class="btn btn-secondary btn-lg" style="background: #FFFFFF; color: #1F1F1F !important; font-weight: 700;" id="quickSubmitBtn">
+          ⭐ Write a Review
+        </button>
+      </div>
+    </div>
+
+    <!-- Alert Box -->
+    <div id="formAlert" class="alert" style="display: none;"></div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+      <button class="tab-btn active" id="btnTabBrowse" onclick="switchTab('browseTab')">
+        📋 View Feedback & Reviews (SCRUM-32)
+      </button>
+      <button class="tab-btn" id="btnTabSubmit" onclick="switchTab('submitTab')">
+        ⭐ Submit Feedback (SCRUM-31)
+      </button>
+      <button class="tab-btn" id="btnTabMyFeedback" onclick="switchTab('myTab')">
+        👤 My Submitted Feedback
+      </button>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 1: BROWSE & VIEW FEEDBACK (SCRUM-32) -->
+    <!-- ========================================================================= -->
+    <section id="browseTabContent">
+      <!-- Rating Summary Hero (Active Vendor Metric) -->
+      <div class="rating-summary-hero" id="ratingSummaryHero">
+        <div class="overall-score-box">
+          <div class="overall-score-num" id="summaryAvgRating">0.0</div>
+          <div class="overall-stars" id="summaryStarsDisplay">☆☆☆☆☆</div>
+          <div class="overall-sub" id="summaryTotalReviews">Based on 0 verified reviews</div>
+        </div>
+        <div>
+          <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--text-main);">
+            Star Rating Distribution
+          </div>
+          <div class="rating-breakdown-list" id="starBreakdownList">
+            <div class="breakdown-row">
+              <span class="breakdown-label">5 Stars</span>
+              <div class="breakdown-bar-bg"><div class="breakdown-bar-fill" id="bar5" style="width: 0%;"></div></div>
+              <span class="breakdown-count" id="count5">0</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">4 Stars</span>
+              <div class="breakdown-bar-bg"><div class="breakdown-bar-fill" id="bar4" style="width: 0%;"></div></div>
+              <span class="breakdown-count" id="count4">0</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">3 Stars</span>
+              <div class="breakdown-bar-bg"><div class="breakdown-bar-fill" id="bar3" style="width: 0%;"></div></div>
+              <span class="breakdown-count" id="count3">0</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">2 Stars</span>
+              <div class="breakdown-bar-bg"><div class="breakdown-bar-fill" id="bar2" style="width: 0%;"></div></div>
+              <span class="breakdown-count" id="count2">0</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">1 Star</span>
+              <div class="breakdown-bar-bg"><div class="breakdown-bar-fill" id="bar1" style="width: 0%;"></div></div>
+              <span class="breakdown-count" id="count1">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Controls Bar -->
+      <div class="table-container" style="margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; flex: 1;">
+            <select id="filterVendor" class="form-control" style="max-width: 260px;" onchange="applyFilters()">
+              <option value="">All Certified Vendors</option>
+            </select>
+            <select id="filterRating" class="form-control" style="max-width: 170px;" onchange="applyFilters()">
+              <option value="">All Ratings</option>
+              <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
+              <option value="4">⭐⭐⭐⭐ 4 Stars</option>
+              <option value="3">⭐⭐⭐ 3 Stars</option>
+              <option value="2">⭐⭐ 2 Stars</option>
+              <option value="1">⭐ 1 Star</option>
+            </select>
+            <select id="filterCategory" class="form-control" style="max-width: 200px;" onchange="applyFilters()">
+              <option value="">All Categories</option>
+              <option value="Product Quality">Product Quality</option>
+              <option value="Delivery & Logistics">Delivery & Logistics</option>
+              <option value="Pricing & Value">Pricing & Value</option>
+              <option value="Customer Service">Customer Service</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+          <div>
+            <button onclick="resetFilters()" class="btn btn-secondary" style="font-size: 0.85rem;">Reset Filters</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback List Container -->
+      <div id="feedbackLoadingIndicator" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+        <p>Loading verified vendor feedback...</p>
+      </div>
+
+      <div id="feedbackEmptyState" class="empty-state" style="display: none;">
+        <div class="empty-state-icon">⭐</div>
+        <h3>No Feedback Records Found</h3>
+        <p>There are no feedback reviews matching your selected criteria. Be the first to share an evaluation!</p>
+        <button onclick="switchTab('submitTab')" class="btn btn-primary" style="margin-top: 1rem;">
+          ⭐ Submit Vendor Feedback
+        </button>
+      </div>
+
+      <div id="feedbackCardsContainer" style="display: none;"></div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 2: SUBMIT FEEDBACK FORM (SCRUM-31) -->
+    <!-- ========================================================================= -->
+    <section id="submitTabContent" style="display: none;">
+      <div class="card" style="max-width: 780px; margin: 0 auto;">
+        <div class="card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+          <h2 style="font-size: 1.25rem; margin-bottom: 0.25rem;">Submit Vendor Review & Rating</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0;">
+            Share your experience to help the procurement organization evaluate supplier performance and delivery quality.
+          </p>
+        </div>
+
+        <form id="feedbackForm" onsubmit="handleFeedbackSubmit(event)">
+          <!-- Vendor Selection (Mandatory) -->
+          <div class="form-group">
+            <label for="vendorSelect" class="form-label required">Select Vendor</label>
+            <select id="vendorSelect" name="vendorId" class="form-control" required onchange="onVendorSelectionChanged()">
+              <option value="">-- Choose a Certified Vendor --</option>
+            </select>
+            <small class="form-text">Vendor being rated (verified against active supplier registry).</small>
+          </div>
+
+          <!-- Linked Order (Optional) -->
+          <div class="form-group">
+            <label for="orderSelect" class="form-label">Linked Purchase Order (Optional)</label>
+            <select id="orderSelect" name="orderId" class="form-control">
+              <option value="">-- No Specific Order / Direct Feedback --</option>
+            </select>
+            <small class="form-text">Associate feedback with a specific completed order.</small>
+          </div>
+
+          <!-- Star Rating (Mandatory 1-5) -->
+          <div class="form-group">
+            <label class="form-label required">Overall Rating</label>
+            <div>
+              <div class="star-rating-widget" id="starRatingWidget">
+                <input type="radio" id="star5" name="rating" value="5" required onclick="updateStarLabel(5)">
+                <label for="star5" title="5 Stars - Excellent">★</label>
+                <input type="radio" id="star4" name="rating" value="4" onclick="updateStarLabel(4)">
+                <label for="star4" title="4 Stars - Very Good">★</label>
+                <input type="radio" id="star3" name="rating" value="3" onclick="updateStarLabel(3)">
+                <label for="star3" title="3 Stars - Good">★</label>
+                <input type="radio" id="star2" name="rating" value="2" onclick="updateStarLabel(2)">
+                <label for="star2" title="2 Stars - Fair">★</label>
+                <input type="radio" id="star1" name="rating" value="1" onclick="updateStarLabel(1)">
+                <label for="star1" title="1 Star - Poor">★</label>
+              </div>
+            </div>
+            <div id="ratingTextDisplay" class="rating-label-display">Please select a star rating (1 to 5)</div>
+          </div>
+
+          <!-- Feedback Category -->
+          <div class="form-group">
+            <label for="categorySelect" class="form-label">Feedback Category</label>
+            <select id="categorySelect" name="category" class="form-control">
+              <option value="Product Quality">Product Quality & Durability</option>
+              <option value="Delivery & Logistics">Delivery Speed & Logistics</option>
+              <option value="Pricing & Value">Pricing Competitiveness & Value</option>
+              <option value="Customer Service">Customer Service & Communication</option>
+              <option value="General" selected>General Purchasing Experience</option>
+            </select>
+          </div>
+
+          <!-- Comments / Feedback Remarks (Mandatory) -->
+          <div class="form-group">
+            <label for="commentsText" class="form-label required">Detailed Comments / Assessment Remarks</label>
+            <textarea 
+              id="commentsText" 
+              name="comments" 
+              rows="4" 
+              class="form-control" 
+              placeholder="Describe product condition, fulfillment timeline, communication responsiveness, warranty support, or any issues encountered..." 
+              required
+              maxlength="1000"
+              oninput="updateCharCount(this)"
+            ></textarea>
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+              <span>Detailed feedback helps refine the composite evaluation scoring engine.</span>
+              <span id="charCountSpan">0 / 1000 chars</span>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div style="display: flex; gap: 1rem; margin-top: 1.5rem; justify-content: flex-end;">
+            <button type="button" onclick="switchTab('browseTab')" class="btn btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" id="submitFeedbackBtn" class="btn btn-primary" style="min-width: 180px;">
+              ⭐ Submit Feedback
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 3: MY AUTHORED FEEDBACK (SCRUM-32) -->
+    <!-- ========================================================================= -->
+    <section id="myTabContent" style="display: none;">
+      <div id="myFeedbackLoading" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+        <p>Loading your submitted feedback...</p>
+      </div>
+
+      <div id="myFeedbackEmpty" class="empty-state" style="display: none;">
+        <div class="empty-state-icon">📝</div>
+        <h3>No Authored Feedback Yet</h3>
+        <p>You have not submitted reviews for any vendors yet.</p>
+        <button onclick="switchTab('submitTab')" class="btn btn-primary" style="margin-top: 1rem;">
+          Write Your First Review →
+        </button>
+      </div>
+
+      <div id="myFeedbackContainer" style="display: none;"></div>
+    </section>
+
+  </main>
+
+  <!-- Modal: Submission Success Notice -->
+  <div id="successNoticeModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-icon" style="background: #EBF3ED; color: #275A36; border: 1px solid #D1E4D6;">⭐</div>
+      <h2 id="successNoticeTitle" class="modal-title">Feedback Submitted!</h2>
+      <div id="successNoticeBody" class="modal-body" style="font-size: 0.95rem; color: var(--text-body);"></div>
+      <div class="modal-actions">
+        <button onclick="closeModal('successNoticeModal'); switchTab('browseTab');" class="btn btn-primary">
+          View All Feedback →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 VEPRS — Vendor Evaluation and Purchase Recommendation System. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/feedback.js"></script>
+  <script>
+    // Enforce authentication across all roles
+    checkAuth(['User/Requester', 'User', 'Requester', 'Vendor', 'Admin']);
+  </script>
+</body>
+</html>

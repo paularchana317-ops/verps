@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 const frontendPath = path.join(__dirname, '../frontend');
 app.use(express.static(frontendPath));
 
-// API Routes (Sprint 1, Sprint 2, Sprint 3 & Sprint 4)
+// API Routes (Sprint 1, Sprint 2, Sprint 3, Sprint 4 & Sprint 5)
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/requests', require('./routes/requests'));
 app.use('/api/vendors', require('./routes/vendors'));
@@ -29,13 +29,14 @@ app.use('/api/vendor', require('./routes/vendorRequests'));
 app.use('/api/quotations', require('./routes/quotations'));
 app.use('/api/evaluations', require('./routes/evaluations'));
 app.use('/api/orders', require('./routes/orders'));
+app.use('/api/feedback', require('./routes/feedback'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'online',
     system: 'Vendor Evaluation and Purchase Recommendation System (VEPRS)',
-    sprint: 4,
+    sprint: 5,
     database: {
       mongodb: isMongoConnected() ? 'connected' : 'fallback_mode',
       sql: 'initialized'

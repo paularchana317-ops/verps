@@ -536,6 +536,12 @@ function renderOrdersTable(orders) {
                 ✕ Cancel
               </button>
             ` : ''}
+
+            ${(isUser || isAdmin) && order.status === 'Delivered' ? `
+              <a href="feedback.html?vendorId=${encodeURIComponent(order.vendor_id)}&orderId=${encodeURIComponent(order.id)}&action=review" class="btn btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.8rem; background: #EBF3ED; color: #1F4E3D; border-color: #D1E4D6;" title="Review Vendor Performance">
+                ⭐ Rate
+              </a>
+            ` : ''}
           </div>
         </td>
       </tr>

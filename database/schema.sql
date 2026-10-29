@@ -211,6 +211,36 @@ CREATE TABLE IF NOT EXISTS orders (
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ----------------------------------------------------------
+-- Table: feedback (Sprint 5 - SCRUM-40, SCRUM-31, SCRUM-32)
+-- ----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS feedback (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    feedback_id VARCHAR(50) NOT NULL UNIQUE,
+    user_id INT NOT NULL,
+    user_name VARCHAR(100) NOT NULL,
+    user_email VARCHAR(150) NOT NULL,
+    vendor_id INT NOT NULL,
+    vendor_code VARCHAR(50) NOT NULL,
+    vendor_name VARCHAR(150) NOT NULL,
+    order_id INT NULL,
+    order_code VARCHAR(50) NULL,
+    rating INT NOT NULL,
+    comments TEXT NOT NULL,
+    category VARCHAR(100) NOT NULL DEFAULT 'General',
+    status VARCHAR(50) NOT NULL DEFAULT 'Active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_feedback_user_id 
+        FOREIGN KEY (user_id) REFERENCES users(id) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_feedback_vendor_id 
+        FOREIGN KEY (vendor_id) REFERENCES vendors(id) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Indexes for high performance
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_purchase_requests_user_id ON purchase_requests(user_id);
@@ -232,3 +262,7 @@ CREATE INDEX idx_orders_user_id ON orders(user_id);
 CREATE INDEX idx_orders_vendor_id ON orders(vendor_id);
 CREATE INDEX idx_orders_order_id ON orders(order_id);
 CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_feedback_vendor_id ON feedback(vendor_id);
+CREATE INDEX idx_feedback_user_id ON feedback(user_id);
+CREATE INDEX idx_feedback_rating ON feedback(rating);
+CREATE INDEX idx_feedback_feedback_id ON feedback(feedback_id);
